@@ -1,0 +1,8 @@
+{
+    "extends": "../.templates/tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".", // not used
+        "rootDir": "..",
+        "outDir": "../dist",
+    },
+}
