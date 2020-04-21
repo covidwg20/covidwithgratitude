@@ -1,0 +1,47 @@
+{
+    "files.exclude": {
+        // generic excludes:
+        "node_modules/{[^.@]*,}": true,
+
+        // project specific excludes:
+        "package-lock.json": true,
+
+        // don't always need this:
+        "node_modules/": true,
+        //"{**/.templates/,**/tsconfig.json}": true,
+        //"{**/.eslintrc.*,.eslintignore}": true,
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "{**/.templates/,**/tsconfig.json}": false,
+    },
+    "json.schemas": [
+        {
+            "fileMatch": [ "/**/*tsconfig.json", ],
+            "url": "http://json.schemastore.org/tsconfig",
+        }, {
+            "fileMatch": [ "/**/*cSpell.json", ],
+            "url": "https://raw.githubusercontent.com/streetsidesoftware/cspell/master/cspell.schema.json",
+        }, {
+            "fileMatch": [ "/**/*.webmanifest", ],
+            "url": "http://json.schemastore.org/web-manifest"
+        }
+    ],
+
+    "eslint.enable": true,
+    "trailing-spaces.trimOnSave": true,
+
+    "todo-tree.filtering.useBuiltInExcludes": "file excludes",
+    "todo-tree.general.statusBar": "total",
+    "todo-tree.general.tags": [
+        "TODO.learn" ,
+        "TODO.design",
+        "TODO.doc"   ,
+        "TODO.impl"  ,
+        "TODO.test"  ,
+        "TODO.build" ,
+        "TODO",
+    ],
+}

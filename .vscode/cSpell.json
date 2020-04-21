@@ -1,0 +1,21 @@
+{
+    "name": "snakey_root",
+    "description": "",
+    "language": "en-GB",
+    "enabledLanguageIds": [
+        "css",
+        "html",
+        "javascript",
+        "javascriptreact",
+        "json",
+        "jsonc",
+        "markdown",
+        "plaintext",
+        "scss",
+        "text",
+        "typescript",
+        "typescriptreact"
+    ],
+    "words": [
+    ]
+}

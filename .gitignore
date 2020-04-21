@@ -1,0 +1,25 @@
+
+# npm
+/node_modules/
+
+# build
+/dist/
+/scripts/eslint-cache.json
+/scripts/webpack/webpack.config.js
+
+# vim
+*.swp
+*.swo
+*.orig
+Session.vim
+
+# vscode
+/.vscode/**/*
+!/.vscode/settings.json
+!/.vscode/cSpell.json
+*.code-workspace
+
+# security
+*.pem
+*.pfx
+*.p12
