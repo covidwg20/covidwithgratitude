@@ -1,10 +1,9 @@
 
 
 export namespace OmHooks {
-    export const Mosaic = Object.freeze(<const>{
-        Class: Object.freeze(<const>{
-            BASE: "mosaic",
-        }),
+    export const Class = Object.freeze(<const>{
+        MAIN_SCROLL_VIEWPORT: "main-scroll-viewport",
+        MAIN_SCROLL: "main-scroll",
     });
 }
 Object.freeze(OmHooks);
