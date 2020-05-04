@@ -1,29 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html data-colour-scheme="scheme0">
     <head>
-        <title>THH-test</title>
-        <meta name="author"         content="???"/>
+        <title>Covid With Gratitude</title>
+        <meta name="author"         content="KEC College Oikos 2020"/>
         <meta name="description"    content="A platform to thank healthcare workers in Vancouver during the covid19 crisis."/>
         <meta name="viewport"       content="width=device-width, initial-scale=1.0"/>
         <meta charset="UTF-8"/>
 
-        <base href=".">
-        <link rel="shortcut icon" href="dist/favicon.ico">
-        <link href="assets/style/index.css" rel="stylesheet">
+        <base href="."/>
+        <link rel="icon" href="assets/favicon.ico"/>
         <meta name="og:title"  content="THH-test"/>
         <meta name="og:description" content="A platform to thank healthcare workers in Vancouver during the covid19 crisis."/>
         <!--<meta name="og:image"  content="./assets/images/"/>-->
+
+        <link href="assets/style/index.css" rel="stylesheet"/>
+        <link rel="stylesheet" href="https://use.typekit.net/lpf1njl.css"/>
     </head>
 
 
     <body style="margin:0;">
-        <div id="background" class="thh-screen"></div>
-        <div id="screen-main" class="thh-screen">
-            <span class="main-sidebar-a sidebar">l</span>
-            <div class="main-scroll-viewport">
-                <div id="" class="main-scroll"></div>
+        <div id="background"  class="cwg-screen"></div>
+        <div id="screen-main" class="cwg-screen">
+            <!-- MAIN SCREEN -->
+            <div></div>
+            <nav class="main-nav">
+                <span class="main-nav__hashtag">#covidwithgratitude</span>
+            </nav>
+            <div class="main-scroll">
+                <div class="main-scroll__houses"></div>
+                <div class="main-scroll__content"></div>
+                <div class="main-scroll__background"></div>
             </div>
-            <span class="main-sidebar-b sidebar">r</span>
         </div>
         <script defer src="dist/index.js"></script>
     </body>

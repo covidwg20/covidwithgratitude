@@ -1,0 +1,11 @@
+
+
+.main-nav {
+    position:       sticky;
+    display:        flex;
+    flex-flow:      column nowrap;
+    background-color: var(--colour-tone0);
+}
+.main-nav__hashtag {
+
+}

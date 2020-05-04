@@ -1,34 +1,30 @@
 
 #screen-main {
-    display: flex;
-    justify-content: space-between;
-    align-items:    stretch;
 }
 #screen-main > * {
-    flex:           auto;
-}
-
-.sidebar {
-    box-sizing:     border-box;
-    padding:        10px;
-}
-
-.main-scroll-viewport {
-    width:          100%;
-    flex:           none;
-    overflow-x:     hidden;
-    overflow-y:     auto;
-}
-@media screen and (min-aspect-ratio: 7/5) {
-    :root .main-scroll-viewport {
-        max-width:  100vh;
-    }
 }
 
 .main-scroll {
-    min-height: 100%;
-
-    background-size:    contain;
+    display: grid;
+    grid-template: "A" minmax(100vh, auto) / 1fr;
+    align-items: stretch;
+}
+.main-scroll__houses,
+.main-scroll__background {
+    pointer-events:     none;
+    grid-area:          A;
+    background-size:    cover;
     background-repeat:  repeat;
-    background-image:   url("../mosaic/batch1/0.jpeg");
+    background-origin:  border-box;
+}
+.main-scroll__houses {
+    background-image: url("../images/houses.svg");
+}
+.main-scroll__background {
+    background-image: url("../images/road_150ppi.png");
+}
+
+.main-scroll__content {
+    grid-area:      A;
+    min-width:      100%;
 }

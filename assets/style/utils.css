@@ -14,8 +14,8 @@
 
 .center-contents {
     display:    inline-flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
 }
 .stack-contents {
     position:   relative;
