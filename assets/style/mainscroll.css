@@ -18,13 +18,17 @@
     background-origin:  border-box;
 }
 .main-scroll__houses {
-    background-image: url("../images/houses.svg");
+    z-index:        2;
+    background-image: url("../images/houses_150ppi.png");
+    background-image: url("../images/houses.svg"), linear-gradient(transparent, transparent);
 }
 .main-scroll__background {
-    background-image: url("../images/road_150ppi.png");
+    z-index:        0;
+    background-image: url("../images/road.png");
 }
 
 .main-scroll__content {
+    z-index:        1;
     grid-area:      A;
     min-width:      100%;
 }
