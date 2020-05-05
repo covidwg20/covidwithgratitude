@@ -19,8 +19,6 @@
 }
 .main-scroll__houses {
     z-index:        2;
-    background-image: url("../images/houses_150ppi.png");
-    background-image: url("../images/houses.svg"), linear-gradient(transparent, transparent);
 }
 .main-scroll__background {
     z-index:        0;
