@@ -6,11 +6,11 @@
         // Compiler Behaviour:
         "moduleResolution": "node",
         "forceConsistentCasingInFileNames": true,
-        "importHelpers": true,
+        //"importHelpers": true,
         "skipLibCheck": true, // time-saving measure.
 
         // Language Settings:
-        "target": "es6",
+        "target": "es5",
         "lib": [ "es6", "dom", "es2019.array" ],
         "module": "ES6",
 

@@ -9,8 +9,7 @@
     grid-template: "A" minmax(100vh, auto) / 1fr;
     align-items: stretch;
 }
-.main-scroll__houses,
-.main-scroll__background {
+.main-scroll__houses {
     pointer-events:     none;
     grid-area:          A;
     background-size:    cover;
@@ -19,10 +18,6 @@
 }
 .main-scroll__houses {
     z-index:        2;
-}
-.main-scroll__background {
-    z-index:        0;
-    background-image: url("../images/road.png");
 }
 
 .main-scroll__content {
