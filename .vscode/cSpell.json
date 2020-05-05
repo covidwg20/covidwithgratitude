@@ -21,8 +21,10 @@
         "covid",
         "oikos",
 
-        "viewbox",
         "elem",
+        "nsps",
+        "sizer",
+        "viewbox",
 
         "hashtag"
     ]

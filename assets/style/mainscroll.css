@@ -9,19 +9,15 @@
     grid-template: "A" minmax(100vh, auto) / 1fr;
     align-items: stretch;
 }
-.main-scroll__houses {
+.main-scroll__content {
     pointer-events:     none;
     grid-area:          A;
     background-size:    cover;
     background-repeat:  repeat;
     background-origin:  border-box;
 }
-.main-scroll__houses {
-    z-index:        2;
-}
 
-.main-scroll__content {
-    z-index:        1;
-    grid-area:      A;
-    min-width:      100%;
+.submission {
+    pointer-events: all;
+    cursor:         pointer;
 }
