@@ -87,15 +87,17 @@ class MainScroll {
 	 */
 	public async takeEmptyBox(): Promise<SVGRectElement> {
 		const slots = await this.slots;
+		let retval: SVGRectElement;
 		if (slots.free.length) {
-			const take = slots.free.shift()!;
-			slots.taken.push(take);
-			return take;
+			retval = slots.free.shift()!;
 		} else {
 			// There are no slots remaining. Extend the artwork:
 			// TODO extend the artwork.
-			return undefined!;
+			retval = undefined!;
 		}
+		slots.taken.push(retval);
+		// TODO.impl if outside main-scroll__sizer, increase sizer.
+		return retval;
 	}
 }
 namespace MainScroll {

@@ -5,16 +5,20 @@
 }
 
 .main-scroll {
-    display: grid;
-    grid-template: "A" minmax(100vh, auto) / 1fr;
-    align-items: stretch;
+    contain:            content;
+    display:            grid;
 }
 .main-scroll__content {
     pointer-events:     none;
-    grid-area:          A;
-    background-size:    cover;
+    position:           absolute;
+    width: 100%;
+ /* background-size:    cover;
     background-repeat:  repeat;
-    background-origin:  border-box;
+    background-origin:  border-box; */
+}
+.main-scroll__sizer {
+    pointer-events:     none;
+    min-height:         100vh;
 }
 
 .submission {
