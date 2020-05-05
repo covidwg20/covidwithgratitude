@@ -38,10 +38,9 @@ class MainScroll {
 		this.xmlDoc.then((xml) => this.hostElem.appendChild(xml));
 
 		this.submissionRects = this.xmlDoc.then((xml) => {
-			return Array.from<SVGRectElement>(
-				xml.getElementsByClassName("submission-viewbox") as
-				HTMLCollectionOf<SVGRectElement>
-			);
+			type r = SVGRectElement;
+			const boxesLayer = xml.querySelector("#graphic_style") as SVGGElement;
+			return Array.from<r>(boxesLayer.childNodes as NodeListOf<r>);
 		});
 		this.submissionRects.then((rects) => {
 			rects.forEach((rect) => {
@@ -57,6 +56,7 @@ class MainScroll {
 	public async registerSubmission(href: string): Promise<void> {
 		const img = document.createElementNS(SVG_NSPS, "image");
 		img.setAttributeNS(XLINK_NSPS, "href", href);
+		img.tabIndex = 0; // Allow selection via tabbing and click.
 		await this.submissionRects;
 
 		const box = await this.getEmptyBox();
