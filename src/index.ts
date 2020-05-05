@@ -1,6 +1,11 @@
 const SVG_NSPS = "http://www.w3.org/2000/svg";
 const XLINK_NSPS = "http://www.w3.org/1999/xlink";
 
+// TODO if repo moves to organization, update link.
+// Also, would it be better to use the version from the
+// `gh-pages` branch? I think no, but I'm not 100% sure yet.
+const GITHUB_RAW = "https://raw.githubusercontent.com/david-fong/CovidWithGratitude/dev/";
+
 async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttpRequest> {
 	var request = new XMLHttpRequest();
 	return new Promise<XMLHttpRequest>((resolve, reject): void => {
@@ -70,7 +75,9 @@ class MainScroll {
 	}
 }
 namespace MainScroll {
-	export const SVG_URL = "assets/images/house.svg";
+	// Set to fetch from GitHub repo because browsers don't like
+	// XHR without HTTPS (because it may not be safe from attackers).
+	export const SVG_URL = GITHUB_RAW + "assets/images/houses.svg";
 }
 
 /**
