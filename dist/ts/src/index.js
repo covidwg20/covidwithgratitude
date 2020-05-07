@@ -37,7 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var SVG_NSPS = "http://www.w3.org/2000/svg";
 var XLINK_NSPS = "http://www.w3.org/1999/xlink";
-var GITHUB_RAW = "https://raw.githubusercontent.com/david-fong/CovidWithGratitude/dev/";
+var GITHUB_RAW = (window.origin != "null") ? ""
+    : "https://raw.githubusercontent.com/david-fong/CovidWithGratitude/dev/";
 function makeRequest(url, method) {
     if (method === void 0) { method = "GET"; }
     return __awaiter(this, void 0, void 0, function () {
@@ -65,52 +66,65 @@ function makeRequest(url, method) {
 var MainScroll = (function () {
     function MainScroll() {
         var _this = this;
-        this.hostElem = document.querySelector(".main-scroll__houses");
-        this.xmlDoc = makeRequest(MainScroll.SVG_URL)
-            .then(function (xhr) { return xhr.responseXML.documentElement; });
-        this.xmlDoc.then(function (xml) { return _this.hostElem.appendChild(xml); });
-        this.submissionRects = this.xmlDoc.then(function (xml) {
-            return Array.from(xml.getElementsByClassName("submission-viewbox"));
+        this.xmlHost = document.querySelector(".main-scroll__content");
+        this.svg = makeRequest(MainScroll.SVG_URL).then(function (xhr) {
+            return xhr.responseXML.documentElement;
         });
-        this.submissionRects.then(function (rects) {
-            rects.forEach(function (rect) {
-                if (!(rect instanceof SVGRectElement)) {
-                    console.log(rect);
-                }
-                console.log(rect.tabIndex);
-                rect.style.color = "black";
+        this.svg.then(function (xml) { return _this.xmlHost.appendChild(xml); });
+        this.slots = this.svg.then(function (xml) {
+            var boxesLayer = xml.getElementById("submission_boxes");
+            var __allSlots = Array.from(boxesLayer.children);
+            var allSlots = Object.freeze(__allSlots.splice(__allSlots.length / 2));
+            return Object.freeze({
+                all: allSlots,
+                free: allSlots.slice(),
+                taken: [],
             });
         });
     }
-    MainScroll.prototype.registerSubmission = function (href) {
+    MainScroll.prototype.registerSubmission = function (imageFilename) {
         return __awaiter(this, void 0, void 0, function () {
-            var img, box;
+            var href, img, box;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        href = "assets/images/submissions/" + imageFilename;
                         img = document.createElementNS(SVG_NSPS, "image");
+                        img.classList.add("submission");
                         img.setAttributeNS(XLINK_NSPS, "href", href);
-                        return [4, this.submissionRects];
+                        img.tabIndex = 0;
+                        img.onclick = function (ev) { return console.log("click!"); };
+                        return [4, this.takeEmptyBox()];
                     case 1:
-                        _a.sent();
-                        return [4, this.getEmptyBox()];
-                    case 2:
                         box = _a.sent();
                         img.setAttribute("preserveAspectRatio", "xMidYMid slice");
-                        img.setAttribute("x", box.x.baseVal.toString());
-                        img.setAttribute("y", box.y.baseVal.toString());
-                        img.setAttribute("height", box.height.baseVal.toString());
-                        img.setAttribute("width", box.width.baseVal.toString());
+                        img.setAttribute("x", box.x.baseVal.valueAsString);
+                        img.setAttribute("y", box.y.baseVal.valueAsString);
+                        img.setAttribute("height", box.height.baseVal.valueAsString);
+                        img.setAttribute("width", box.width.baseVal.valueAsString);
                         box.insertAdjacentElement("afterend", img);
-                        return [2];
+                        return [2, img];
                 }
             });
         });
     };
-    MainScroll.prototype.getEmptyBox = function () {
+    MainScroll.prototype.takeEmptyBox = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var slots, retval;
             return __generator(this, function (_a) {
-                return [2, undefined];
+                switch (_a.label) {
+                    case 0: return [4, this.slots];
+                    case 1:
+                        slots = _a.sent();
+                        if (slots.free.length) {
+                            retval = slots.free.shift();
+                        }
+                        else {
+                            retval = undefined;
+                        }
+                        slots.taken.push(retval);
+                        return [2, retval];
+                }
             });
         });
     };
@@ -119,5 +133,7 @@ var MainScroll = (function () {
 (function (MainScroll) {
     MainScroll.SVG_URL = GITHUB_RAW + "assets/images/houses.svg";
 })(MainScroll || (MainScroll = {}));
+Object.freeze(MainScroll);
+Object.freeze(MainScroll.prototype);
 var mainScroll = new MainScroll();
 //# sourceMappingURL=index.js.map
