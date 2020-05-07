@@ -1,9 +1,9 @@
 const SVG_NSPS = "http://www.w3.org/2000/svg";
 const XLINK_NSPS = "http://www.w3.org/1999/xlink";
 
-// TODO if repo moves to organization, update link. Once we enter
-// production, it may be better to use the `gh-pages` branch here...
-const GITHUB_RAW = "https://raw.githubusercontent.com/david-fong/CovidWithGratitude/dev/";
+// TODO if repo moves to organization, update link.
+const GITHUB_RAW = (window.origin != "null") ? ""
+	: "https://raw.githubusercontent.com/david-fong/CovidWithGratitude/dev/";
 
 async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttpRequest> {
 	var request = new XMLHttpRequest();
