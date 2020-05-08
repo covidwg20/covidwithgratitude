@@ -63,6 +63,25 @@ function makeRequest(url, method) {
     });
 }
 ;
+var VIEW_SUBMISSION_SCREEN = document.getElementById("screen-view-submission");
+VIEW_SUBMISSION_SCREEN.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") {
+        VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+    }
+});
+VIEW_SUBMISSION_SCREEN.addEventListener("click", function (ev) {
+    if (ev.target === VIEW_SUBMISSION_SCREEN) {
+        VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+    }
+});
+var Submission = (function () {
+    function Submission(svgImage) {
+        this.svgImage = svgImage;
+    }
+    return Submission;
+}());
+Object.freeze(Submission);
+Object.freeze(Submission.prototype);
 var MainScroll = (function () {
     function MainScroll() {
         var _this = this;
@@ -81,10 +100,12 @@ var MainScroll = (function () {
                 taken: [],
             });
         });
+        this.submissions = [];
     }
     MainScroll.prototype.registerSubmission = function (imageFilename) {
         return __awaiter(this, void 0, void 0, function () {
-            var href, img, box;
+            var href, img, submission, box, x, y, h, w;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -93,16 +114,26 @@ var MainScroll = (function () {
                         img.classList.add("submission");
                         img.setAttributeNS(XLINK_NSPS, "href", href);
                         img.tabIndex = 0;
-                        img.onclick = function (ev) { return console.log("click!"); };
+                        submission = new Submission(img);
+                        img.onclick = function (ev) {
+                            _this.displayFullSubmission(submission);
+                        };
                         return [4, this.takeEmptyBox()];
                     case 1:
                         box = _a.sent();
                         img.setAttribute("preserveAspectRatio", "xMidYMid slice");
-                        img.setAttribute("x", box.x.baseVal.valueAsString);
-                        img.setAttribute("y", box.y.baseVal.valueAsString);
-                        img.setAttribute("height", box.height.baseVal.valueAsString);
-                        img.setAttribute("width", box.width.baseVal.valueAsString);
+                        x = box.x.baseVal;
+                        y = box.y.baseVal;
+                        h = box.height.baseVal;
+                        w = box.width.baseVal;
+                        x.value;
+                        img.setAttribute("x", x.valueAsString);
+                        img.setAttribute("y", y.valueAsString);
+                        img.setAttribute("height", h.valueAsString);
+                        img.setAttribute("width", w.valueAsString);
+                        img.style.transformOrigin = x.value + (w.value / 2) + " " + (y.value + (h.value / 2));
                         box.insertAdjacentElement("afterend", img);
+                        this.submissions.push(submission);
                         return [2, img];
                 }
             });
@@ -125,6 +156,14 @@ var MainScroll = (function () {
                         slots.taken.push(retval);
                         return [2, retval];
                 }
+            });
+        });
+    };
+    MainScroll.prototype.displayFullSubmission = function (submission) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                VIEW_SUBMISSION_SCREEN.style.visibility = "visible";
+                return [2];
             });
         });
     };

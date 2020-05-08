@@ -25,3 +25,6 @@
     pointer-events: all;
     cursor:         pointer;
 }
+.submission:hover {
+    transform: scale(1.2);
+}

@@ -1,4 +1,4 @@
-const SVG_NSPS = "http://www.w3.org/2000/svg";
+const SVG_NSPS   = "http://www.w3.org/2000/svg";
 const XLINK_NSPS = "http://www.w3.org/1999/xlink";
 
 // TODO if repo moves to organization, update link.
@@ -22,6 +22,32 @@ async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttp
 };
 
 
+const VIEW_SUBMISSION_SCREEN = document.getElementById("screen-view-submission")!;
+VIEW_SUBMISSION_SCREEN.addEventListener("keydown", (ev) => {
+	if (ev.key === "Escape") {
+		VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+	}
+});
+VIEW_SUBMISSION_SCREEN.addEventListener("click", (ev) => {
+	if (ev.target === VIEW_SUBMISSION_SCREEN) {
+		VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+	}
+});
+
+
+/**
+ *
+ */
+class Submission {
+	public readonly svgImage: SVGImageElement;
+	public constructor(svgImage: SVGImageElement) {
+		this.svgImage = svgImage;
+	}
+}
+Object.freeze(Submission);
+Object.freeze(Submission.prototype);
+
+
 /**
  *
  */
@@ -30,9 +56,10 @@ class MainScroll {
 	private readonly svg: Promise<SVGSVGElement>;
 	private readonly slots: Promise<Readonly<{
 		all:   readonly SVGRectElement[];
-		free: SVGRectElement[];
+		free:  SVGRectElement[];
 		taken: SVGRectElement[];
 	}>>;
+	private readonly submissions: Submission[];
 
     public constructor() {
 		this.xmlHost = document.querySelector(".main-scroll__content") as HTMLElement;
@@ -56,6 +83,7 @@ class MainScroll {
 				taken: [],
 			});
 		});
+		this.submissions = [];
 	}
 
 	/**
@@ -68,17 +96,27 @@ class MainScroll {
 		img.classList.add("submission");
 		img.setAttributeNS(XLINK_NSPS, "href", href);
 		img.tabIndex = 0; // Allow selection via tabbing and click.
-		img.onclick = (ev) => console.log("click!");
+
+		const submission = new Submission(img);
+		img.onclick = (ev) => {
+			this.displayFullSubmission(submission);
+		};
 
 		const box = await this.takeEmptyBox();
 		img.setAttribute("preserveAspectRatio", "xMidYMid slice");
-		img.setAttribute(	  "x", box.x.baseVal.valueAsString);
-		img.setAttribute(     "y", box.y.baseVal.valueAsString);
-		img.setAttribute("height", box.height.baseVal.valueAsString);
-		img.setAttribute( "width", box.width.baseVal.valueAsString);
+		const x = box.x.baseVal;
+		const y = box.y.baseVal;
+		const h = box.height.baseVal;
+		const w = box.width.baseVal;
+		img.setAttribute(	  "x", x.valueAsString);
+		img.setAttribute(     "y", y.valueAsString);
+		img.setAttribute("height", h.valueAsString);
+		img.setAttribute( "width", w.valueAsString);
+		//img.style.transformOrigin = `${x.value + (w.value/2)} ${y.value + (h.value/2)}`;
 		box.insertAdjacentElement("afterend", img);
 		// It should go after since SVG1 uses xml-tree order to determine
 		// paint-order, and we want it to go _on top_ of the slot rectangle.
+		this.submissions.push(submission);
 		return img;
 	}
 
@@ -98,6 +136,10 @@ class MainScroll {
 		slots.taken.push(retval);
 		// TODO.impl if outside main-scroll__sizer, increase sizer.
 		return retval;
+	}
+
+	public async displayFullSubmission(submission: Submission): Promise<void> {
+		VIEW_SUBMISSION_SCREEN.style.visibility = "visible";
 	}
 }
 namespace MainScroll {
