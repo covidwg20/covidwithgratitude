@@ -22,9 +22,19 @@
 }
 
 .submission {
-    pointer-events: all;
+    pointer-events: none;
     cursor:         pointer;
 }
-.submission:hover {
-    transform: scale(1.2);
+.submission__image:hover {
+    transform: scale(1.1);
+}
+
+.submission__id-text {
+    fill:           white;
+    opacity:        0.7;
+    transition:     fill 0.25s ease-out;
+}
+.submission__image {
+    pointer-events: all;
+    transition: transform 0.25s ease-out;
 }

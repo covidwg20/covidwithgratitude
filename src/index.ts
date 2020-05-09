@@ -3,155 +3,183 @@ const XLINK_NSPS = "http://www.w3.org/1999/xlink";
 
 // TODO if repo moves to organization, update link.
 const GITHUB_RAW = (window.origin != "null") ? ""
-	: "https://raw.githubusercontent.com/david-fong/CovidWithGratitude/dev/";
+    : "https://raw.githubusercontent.com/david-fong/CovidWithGratitude/dev/";
 
 async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttpRequest> {
-	var request = new XMLHttpRequest();
-	return new Promise<XMLHttpRequest>((resolve, reject): void => {
-		request.onreadystatechange = () => {
-			if (request.readyState !== 4) return;
-			if (request.status >= 200 && request.status < 300) {
-				resolve(request);
-			} else {
-				reject(request);
-			}
-		};
-		request.open(method, url);
-		request.send();
-	});
+    var request = new XMLHttpRequest();
+    return new Promise<XMLHttpRequest>((resolve, reject): void => {
+        request.onreadystatechange = () => {
+            if (request.readyState !== 4) return;
+            if (request.status >= 200 && request.status < 300) {
+                resolve(request);
+            } else {
+                reject(request);
+            }
+        };
+        request.open(method, url);
+        request.send();
+    });
 };
 
 
 const VIEW_SUBMISSION_SCREEN = document.getElementById("screen-view-submission")!;
 VIEW_SUBMISSION_SCREEN.addEventListener("keydown", (ev) => {
-	if (ev.key === "Escape") {
-		VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
-	}
+    if (ev.key === "Escape") {
+        VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+    }
 });
 VIEW_SUBMISSION_SCREEN.addEventListener("click", (ev) => {
-	if (ev.target === VIEW_SUBMISSION_SCREEN) {
-		VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
-	}
+    if (ev.target === VIEW_SUBMISSION_SCREEN) {
+        VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+    }
 });
 
 
 /**
  *
  */
-class Submission {
-	public readonly svgImage: SVGImageElement;
-	public constructor(svgImage: SVGImageElement) {
-		this.svgImage = svgImage;
-	}
-}
-Object.freeze(Submission);
-Object.freeze(Submission.prototype);
-
-
-/**
- *
- */
+// TODO.learn is memory a concern with the template? We could just request
+// it over XHR every time we want to make a copy... Is the browser caching
+// it already/anyway?
 class MainScroll {
-    public  readonly xmlHost: HTMLElement;
-	private readonly svg: Promise<SVGSVGElement>;
-	private readonly slots: Promise<Readonly<{
-		all:   readonly SVGRectElement[];
-		free:  SVGRectElement[];
-		taken: SVGRectElement[];
-	}>>;
-	private readonly submissions: Submission[];
+    public  readonly artHostElem: HTMLElement;
+    private readonly svgTemplate: Promise<SVGSVGElement>;
+    private readonly slots: MainScroll.Slot[];
 
     public constructor() {
-		this.xmlHost = document.querySelector(".main-scroll__content") as HTMLElement;
-		this.svg = makeRequest(MainScroll.SVG_URL).then((xhr) => {
-			return xhr.responseXML!.documentElement!;
-		}) as Promise<SVGSVGElement>;
-		this.svg.then((xml) => this.xmlHost.appendChild(xml));
+        this.artHostElem = document.querySelector(".main-scroll__content") as HTMLElement;
+        this.svgTemplate = makeRequest(MainScroll.ARTWORK_SVG_URL).then((xhr) => {
+            return xhr.responseXML!.documentElement!;
+        }) as Promise<SVGSVGElement>;
+        this.svgTemplate.then((xml) => {
+            xml.setAttribute("text-anchor", "middle");
+            xml.setAttribute("dominant-baseline", "middle");
+        });
+        this.slots = [];
+        this.extendArtwork().then(); // TODO.impl fill in with existing submissions.
+    }
 
-		this.slots = this.svg.then((xml) => {
-			const boxesLayer = xml.getElementById("submission_boxes") as SVGGElement;
-			const __allSlots = Array.from(boxesLayer.children) as SVGRectElement[];
-			const allSlots = Object.freeze(
-				__allSlots.splice(__allSlots.length / 2)
-				// TODO.build ^Remove splice temp-fix if we solve the
-				// duplicating issue from Adobe Illustrator's export.
-				// (The second half are unwanted duplicates of the first half).
-			);
-			return Object.freeze({
-				all:   allSlots,
-				free:  allSlots.slice(),
-				taken: [],
-			});
-		});
-		this.submissions = [];
-	}
+    /**
+     *
+     * NOTE: We intentionally don't try to attach any submission
+     * thumbnails before attaching the new extension to the DOM (which
+     * would reduce repaints, etc.) because we want to the artwork to
+     * load first, and to do so quickly.
+     */
+    public async extendArtwork(): Promise<void> {
+        const newSvgCopy = (await this.svgTemplate).cloneNode(true) as SVGSVGElement;
 
-	/**
-	 *
-	 * @param imageFilename - Must include the file extension.
-	 */
-	public async registerSubmission(imageFilename: string): Promise<SVGImageElement> {
-		const href = "assets/images/submissions/" + imageFilename;
-		const img = document.createElementNS(SVG_NSPS, "image");
-		img.classList.add("submission");
-		img.setAttributeNS(XLINK_NSPS, "href", href);
-		img.tabIndex = 0; // Allow selection via tabbing and click.
+        const boxesLayer = newSvgCopy.getElementById("submission_boxes") as SVGGElement;
+        const __allSlots = Array.from(boxesLayer.children) as SVGRectElement[];
+        // ^A nascent version of allSlots defined to allow getting `length / 2`.
+        const prevNumSlots = this.slots.length;
+        const newSlots = __allSlots.splice(__allSlots.length / 2)
+            // TODO.build ^Remove splice temp-fix if we solve the
+            // duplicating issue from Adobe Illustrator's export.
+            // (The second half are unwanted duplicates of the first half).
 
-		const submission = new Submission(img);
-		img.onclick = (ev) => {
-			this.displayFullSubmission(submission);
-		};
+            // Sort by Y-position, breaking ties by X-position.
+            .map((rect) => Object.freeze({ rect, x: rect.x.baseVal.value, y: rect.y.baseVal.value, }))
+            .sort((a,b) => a.x - b.x).sort((a,b) => a.y - b.y)
+            .map((desc, index) => new MainScroll.Slot(prevNumSlots + index, desc.rect));
+        this.slots.push(...newSlots);
 
-		const box = await this.takeEmptyBox();
-		img.setAttribute("preserveAspectRatio", "xMidYMid slice");
-		const x = box.x.baseVal;
-		const y = box.y.baseVal;
-		const h = box.height.baseVal;
-		const w = box.width.baseVal;
-		img.setAttribute(	  "x", x.valueAsString);
-		img.setAttribute(     "y", y.valueAsString);
-		img.setAttribute("height", h.valueAsString);
-		img.setAttribute( "width", w.valueAsString);
-		//img.style.transformOrigin = `${x.value + (w.value/2)} ${y.value + (h.value/2)}`;
-		box.insertAdjacentElement("afterend", img);
-		// It should go after since SVG1 uses xml-tree order to determine
-		// paint-order, and we want it to go _on top_ of the slot rectangle.
-		this.submissions.push(submission);
-		return img;
-	}
+        this.artHostElem.appendChild(newSvgCopy);
+    }
 
-	/**
-	 *
-	 */
-	public async takeEmptyBox(): Promise<SVGRectElement> {
-		const slots = await this.slots;
-		let retval: SVGRectElement;
-		if (slots.free.length) {
-			retval = slots.free.shift()!;
-		} else {
-			// There are no slots remaining. Extend the artwork:
-			// TODO extend the artwork.
-			retval = undefined!;
-		}
-		slots.taken.push(retval);
-		// TODO.impl if outside main-scroll__sizer, increase sizer.
-		return retval;
-	}
-
-	public async displayFullSubmission(submission: Submission): Promise<void> {
-		VIEW_SUBMISSION_SCREEN.style.visibility = "visible";
-	}
+    /**
+     * Throws an error if the slot is not empty.
+     */
+    // TODO.impl this should only need to take the slot id.
+    public fillSlot(slotId: MainScroll.Slot.Id, imageFilename: string): void {
+        // TODO.impl
+        const slot = this.slots[slotId];
+        if (!slot.isEmpty) throw new Error(`slot \`${slotId}\` is already occupied`);
+        slot.__fill(imageFilename);
+    }
 }
 namespace MainScroll {
-	// Set to fetch from GitHub repo because browsers don't like
-	// XHR without HTTPS (because it may not be safe from attackers).
-	export const SVG_URL = GITHUB_RAW + "assets/images/houses.svg";
+    // Set to fetch from GitHub repo because browsers don't like
+    // XHR without HTTPS (because it may not be safe from attackers).
+    export const ARTWORK_SVG_URL = GITHUB_RAW + "assets/images/houses.svg";
+    /**
+     *
+     */
+    export class Slot {
+        private readonly shapeRect: SVGRectElement;
+        private readonly baseElem:  SVGSVGElement;
+        private __image: SVGImageElement | undefined;
+
+        public constructor(id: Slot.Id, rect: SVGRectElement) {
+            this.shapeRect = rect;
+            const base = this.baseElem = document.createElementNS(SVG_NSPS, "svg");
+            base.classList.add("submission");
+            const bsa = base.setAttribute.bind(base);
+            bsa(     "x", rect.x.baseVal.valueAsString);
+            bsa(     "y", rect.y.baseVal.valueAsString);
+            bsa("height", rect.height.baseVal.valueAsString);
+            bsa( "width", rect.width.baseVal.valueAsString);
+            bsa("preserveAspectRatio", "xMidYMid slice");
+            bsa("viewBox", "-50 -50 100 100");
+            // Create id text:
+            const idText = document.createElementNS(SVG_NSPS, "text");
+            idText.classList.add("submission__id-text");
+            idText.innerHTML = id.toString();
+            base.appendChild(idText);
+
+            // Attach base element to svg/xml document.
+            rect.insertAdjacentElement("afterend", base);
+        }
+        /**
+         * Do not use this directly. Use the wrapper defined in `MainScroll`.
+         */
+        // TODO.design This should take a slot id.
+        public __fill(imageFilename: string): void {
+            const img = this.__image = document.createElementNS(SVG_NSPS, "image");
+            img.classList.add("submission__image");
+            img.tabIndex = 0; // Allow selection via tabbing and click.
+            img.onclick = (ev) => {
+                if (this.isEmpty) {
+                    // TODO.design Handle submission request:
+                } else {
+                    this.displayFull();
+                }
+            };
+
+            const href = Slot.ASSETS_ROOT + imageFilename;
+            img.setAttributeNS(XLINK_NSPS, "href", href);
+
+            const isa = img.setAttribute.bind(img);
+            isa(     "x", "-50");
+            isa(     "y", "-50");
+            isa("height", "100");
+            isa( "width", "100");
+            isa("preserveAspectRatio", "xMidYMid slice");
+            this.baseElem.appendChild(img);
+            // It should go after since SVG1 uses xml-tree order to determine
+            // paint-order, and we want it to go _on top_ of the slot rectangle.
+        }
+        public get isEmpty(): boolean {
+            return this.__image === undefined;
+        }
+
+        public displayFull(): void {
+            VIEW_SUBMISSION_SCREEN.style.visibility = "visible";
+            // TODO.impl Put this submission's contents in the modal.
+        }
+    }
+    export namespace Slot {
+        export type Id = number;
+        export const ASSETS_ROOT = "assets/images/submissions/";
+    }
+    Object.freeze(Slot);
+    Object.freeze(Slot.prototype);
 }
 Object.freeze(MainScroll);
 Object.freeze(MainScroll.prototype);
+
 
 /**
  * Instantiate it:
  */
 const mainScroll = new MainScroll();
-
