@@ -19,11 +19,6 @@ body {
     background-color: var(--colour-mainBg);
 }
 
-#screen-view-submission {
-    visibility:         hidden;
-    background-color: #00000050;
-}
-
 .cwg-screen {
     /* Make sure that each display
     starts its own stacking context. */
