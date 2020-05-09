@@ -8,17 +8,22 @@
     contain:            content;
     display:            grid;
 }
-.main-scroll__content {
+/* Currently turned off. To turn back on, set
+the sizer to be relatively positioned, and the
+content to be absolutely positioned. */
+.main-scroll__sizer {
     pointer-events:     none;
     position:           absolute;
+    min-height:         100vh;
+    background-color:  var(--colour-tone2);
+}
+.main-scroll__content {
+    pointer-events:     none;
+    position:           relative;
     width: 100%;
  /* background-size:    cover;
     background-repeat:  repeat;
     background-origin:  border-box; */
-}
-.main-scroll__sizer {
-    pointer-events:     none;
-    min-height:         100vh;
 }
 
 .submission {
