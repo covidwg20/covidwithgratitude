@@ -1,8 +1,8 @@
 
 [data-colour-scheme="scheme0"] {
-    --colour-mainBg:    #ffffff;
+    --colour-white:     #ffffff;
     --colour-main-Fg:   #737373;
     --colour-tone0:     #eae1ca;
     --colour-tone1:     #d8d9b4;
-    --colour-tone2:     #a1d1ca;
+    --colour-blue:      #a1d1ca;
 }

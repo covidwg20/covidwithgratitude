@@ -7,10 +7,21 @@
     display:        flex;
     align-items:    center;
 
-    padding:        0.5em;
-    background-color: var(--colour-mainBg);
-    font-size: 130%;
+    padding:        0.7em 1em;
+    background-color: var(--colour-white);
+    font-size:      130%;
 }
 .main-nav__hashtag {
+    font-family: playfair-display;
+}
 
+.main-motto {
+    padding:        0.8em;
+    font-style:     italic;
+    background-color: var(--colour-tone0);
+}
+.main-blurb {
+    padding:        2em;
+    font-size:      75%;
+    background-color: var(--colour-white);
 }

@@ -1,13 +1,12 @@
 
 /* If anything goes into fullscreen mode: */
 ::backdrop {
-    background-color: var(--colour-mainBg);
+    background-color: var(--colour-white);
 }
 
 html {
     scroll-behavior: smooth;
 }
-
 body {
     font-family:    "open-sans";
     color:          var(--colour-mainFg);
@@ -16,16 +15,19 @@ body {
 
 #background {
     z-index:        -1000;
-    background-color: var(--colour-mainBg);
+    background-color: var(--colour-white);
 }
-
+#screen-view-submission {
+    visibility:         hidden;
+    background-color: #00000050;
+}
 .cwg-screen {
     /* Make sure that each display
     starts its own stacking context. */
     contain:        strict;
     z-index:        0;
     position:       absolute;
-    overflow:       auto;
+    overflow:       auto; /* Use Scrollbars */
     top: 0; right: 0; bottom: 0; left: 0;
 }
 
