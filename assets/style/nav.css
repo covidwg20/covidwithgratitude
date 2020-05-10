@@ -1,26 +1,37 @@
 
 
-.main-nav {
+#nav {
     z-index:        1000;
     position:       sticky;
     top:            0px;
     display:        flex;
-    align-items:    center;
+    justify-content: space-between;
+    align-items:    stretch;
 
-    padding:        0.7em 1em;
+    font-size:      90%;
     background-color: var(--colour-white);
-    font-size:      130%;
 }
-.main-nav__hashtag {
-    font-family: playfair-display;
+#nav > */*(L/R sides)*/ {
+    display:        flex;
+    align-items:    stretch;
+}
+#nav > */*(L/R sides)*/ > * {
+    display:        flex;
+    align-items:    center;
+    padding:        0.7rem  1.0rem;
+}
+#nav__hashtag {
+    font-size:      190%;
+    font-family:    playfair-display;
 }
 
-.main-motto {
+
+#main-motto {
     padding:        0.8em;
     font-style:     italic;
     background-color: var(--colour-tone0);
 }
-.main-blurb {
+#main-blurb {
     padding:        2em;
     font-size:      75%;
     background-color: var(--colour-white);

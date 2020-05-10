@@ -19,25 +19,30 @@
 
 
     <body style="margin:0;">
-        <div class="cwg-screen" id="background"></div>
-        <div class="cwg-screen" id="screen-main">
-            <!-- MAIN SCREEN -->
-            <header></header>
-            <nav class="main-nav">
-                <span class="main-nav__hashtag">#covidwithgratitude</span>
-            </nav>
-            <div class="main-motto">"staying in, staying thankful"</div>
-            <div class="main-blurb">"[Our blurb]"</div>
-            <div class="main-scroll">
-                <div class="main-scroll__sizer"></div>
-                <div class="main-scroll__content"></div>
-            </div>
+        <header></header>
+        <nav id="nav">
+        <!-- left side -->
+            <span>
+                <span id="nav__hashtag">#covidwithgratitude</span>
+            </span>
+        <!-- right side -->
+            <span>
+                <span><span>Contribute</span></span>
+                <span><span>Contact</span></span>
+                <!-- TODO logo goes here -->
+            </span>
+        </nav>
+    <!-- MAIN CONTENT -->
+        <div id="main">
+            <div id="sticky-detector"></div>
+            <div id="main-motto">"staying in, staying thankful"</div>
+            <div id="main-blurb">"[Our blurb]"</div>
+            <div class="main-scroll"></div>
         </div>
-        <div class="cwg-screen" id="screen-view-submission">
-            <!-- VIEW-SUBMISSION SCREEN -->
-        </div>
+    <!-- SUBMISSION MODAL -->
+        <div id="submission-modal"></div>
+    <!-- ABOUT US SCREEN -->
         <div class="cwg-screen" id="screen-about-us">
-            <!-- ABOUT US SCREEN -->
         </div>
         <script defer src="dist/ts/src/index.js"></script>
     </body>
