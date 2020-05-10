@@ -63,75 +63,123 @@ function makeRequest(url, method) {
     });
 }
 ;
+var VIEW_SUBMISSION_SCREEN = document.getElementById("screen-view-submission");
+VIEW_SUBMISSION_SCREEN.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") {
+        VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+    }
+});
+VIEW_SUBMISSION_SCREEN.addEventListener("click", function (ev) {
+    if (ev.target === VIEW_SUBMISSION_SCREEN) {
+        VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+    }
+});
 var MainScroll = (function () {
     function MainScroll() {
-        var _this = this;
-        this.xmlHost = document.querySelector(".main-scroll__content");
-        this.svg = makeRequest(MainScroll.SVG_URL).then(function (xhr) {
+        this.artHostElem = document.querySelector(".main-scroll__content");
+        this.svgTemplate = makeRequest(MainScroll.ARTWORK_SVG_URL).then(function (xhr) {
             return xhr.responseXML.documentElement;
         });
-        this.svg.then(function (xml) { return _this.xmlHost.appendChild(xml); });
-        this.slots = this.svg.then(function (xml) {
-            var boxesLayer = xml.getElementById("submission_boxes");
-            var __allSlots = Array.from(boxesLayer.children);
-            var allSlots = Object.freeze(__allSlots.splice(__allSlots.length / 2));
-            return Object.freeze({
-                all: allSlots,
-                free: allSlots.slice(),
-                taken: [],
-            });
+        this.svgTemplate.then(function (xml) {
+            xml.setAttribute("text-anchor", "middle");
+            xml.setAttribute("dominant-baseline", "middle");
+        });
+        this.slots = [];
+        this.extendArtwork().then(function () {
+            mainScroll.fillSlot(0, "thepassionofchrist.png");
         });
     }
-    MainScroll.prototype.registerSubmission = function (imageFilename) {
+    MainScroll.prototype.extendArtwork = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var href, img, box;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        href = "assets/images/submissions/" + imageFilename;
-                        img = document.createElementNS(SVG_NSPS, "image");
-                        img.classList.add("submission");
-                        img.setAttributeNS(XLINK_NSPS, "href", href);
-                        img.tabIndex = 0;
-                        img.onclick = function (ev) { return console.log("click!"); };
-                        return [4, this.takeEmptyBox()];
+            var newSvgCopy, boxesLayer, __allSlots, prevNumSlots, newSlots;
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4, this.svgTemplate];
                     case 1:
-                        box = _a.sent();
-                        img.setAttribute("preserveAspectRatio", "xMidYMid slice");
-                        img.setAttribute("x", box.x.baseVal.valueAsString);
-                        img.setAttribute("y", box.y.baseVal.valueAsString);
-                        img.setAttribute("height", box.height.baseVal.valueAsString);
-                        img.setAttribute("width", box.width.baseVal.valueAsString);
-                        box.insertAdjacentElement("afterend", img);
-                        return [2, img];
+                        newSvgCopy = (_b.sent()).cloneNode(true);
+                        boxesLayer = newSvgCopy.getElementById("submission_boxes");
+                        __allSlots = Array.from(boxesLayer.children);
+                        prevNumSlots = this.slots.length;
+                        newSlots = __allSlots.splice(__allSlots.length / 2)
+                            .map(function (rect) { return Object.freeze({ rect: rect, x: rect.x.baseVal.value, y: rect.y.baseVal.value, }); })
+                            .sort(function (a, b) { return a.x - b.x; }).sort(function (a, b) { return a.y - b.y; })
+                            .map(function (desc, index) { return new MainScroll.Slot(prevNumSlots + index, desc.rect); });
+                        (_a = this.slots).push.apply(_a, newSlots);
+                        this.artHostElem.appendChild(newSvgCopy);
+                        return [2];
                 }
             });
         });
     };
-    MainScroll.prototype.takeEmptyBox = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var slots, retval;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, this.slots];
-                    case 1:
-                        slots = _a.sent();
-                        if (slots.free.length) {
-                            retval = slots.free.shift();
-                        }
-                        else {
-                            retval = undefined;
-                        }
-                        slots.taken.push(retval);
-                        return [2, retval];
-                }
-            });
-        });
+    MainScroll.prototype.fillSlot = function (slotId, imageFilename) {
+        var slot = this.slots[slotId];
+        if (!slot.isEmpty)
+            throw new Error("slot `" + slotId + "` is already occupied");
+        slot.__fill(imageFilename);
     };
     return MainScroll;
 }());
 (function (MainScroll) {
-    MainScroll.SVG_URL = GITHUB_RAW + "assets/images/houses.svg";
+    MainScroll.ARTWORK_SVG_URL = GITHUB_RAW + "assets/images/houses.svg";
+    var Slot = (function () {
+        function Slot(id, rect) {
+            this.shapeRect = rect;
+            var base = this.baseElem = document.createElementNS(SVG_NSPS, "svg");
+            base.classList.add("submission");
+            var bsa = base.setAttribute.bind(base);
+            bsa("x", rect.x.baseVal.valueAsString);
+            bsa("y", rect.y.baseVal.valueAsString);
+            bsa("height", rect.height.baseVal.valueAsString);
+            bsa("width", rect.width.baseVal.valueAsString);
+            bsa("preserveAspectRatio", "xMidYMid slice");
+            bsa("viewBox", "-50 -50 100 100");
+            var idText = document.createElementNS(SVG_NSPS, "text");
+            idText.classList.add("submission__id-text");
+            idText.innerHTML = id.toString();
+            base.appendChild(idText);
+            rect.insertAdjacentElement("afterend", base);
+        }
+        Slot.prototype.__fill = function (imageFilename) {
+            var _this = this;
+            var img = this.__image = document.createElementNS(SVG_NSPS, "image");
+            img.classList.add("submission__image");
+            img.tabIndex = 0;
+            img.onclick = function (ev) {
+                if (_this.isEmpty) {
+                }
+                else {
+                    _this.displayFull();
+                }
+            };
+            var href = Slot.ASSETS_ROOT + imageFilename;
+            img.setAttributeNS(XLINK_NSPS, "href", href);
+            var isa = img.setAttribute.bind(img);
+            isa("x", "-50");
+            isa("y", "-50");
+            isa("height", "100");
+            isa("width", "100");
+            isa("preserveAspectRatio", "xMidYMid slice");
+            this.baseElem.appendChild(img);
+        };
+        Object.defineProperty(Slot.prototype, "isEmpty", {
+            get: function () {
+                return this.__image === undefined;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Slot.prototype.displayFull = function () {
+            VIEW_SUBMISSION_SCREEN.style.visibility = "visible";
+        };
+        return Slot;
+    }());
+    MainScroll.Slot = Slot;
+    (function (Slot) {
+        Slot.ASSETS_ROOT = "assets/images/submissions/";
+    })(Slot = MainScroll.Slot || (MainScroll.Slot = {}));
+    Object.freeze(Slot);
+    Object.freeze(Slot.prototype);
 })(MainScroll || (MainScroll = {}));
 Object.freeze(MainScroll);
 Object.freeze(MainScroll.prototype);
