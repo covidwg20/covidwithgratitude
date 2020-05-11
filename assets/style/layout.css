@@ -9,10 +9,15 @@
 
     border-color:   transparent;
     border-style:   solid;
-    border-width: 0rem  0rem  0.2rem  0rem
+    border-width:   0.2rem  0rem;
 }
-[id^="goto-screen"]:hover {
-    border-color:   var(--colour-mainFg);
+[id^="goto-screen"][data-screen-current] {
+    border-bottom-color:    var(--colour-mainFg-thin);
+}
+/* js auto-focuses these on pointer-entry */
+[id^="goto-screen"]:focus {
+    outline:        none;
+    border-bottom-color:   var(--colour-mainFg);
 }
 
 nav {

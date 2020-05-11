@@ -21,6 +21,7 @@ async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttp
     });
 };
 
+
 let __CURRENT_SCREEN: ScreenDesc = undefined!;
 const SCREEN_ID = Object.freeze(<const>{
 	MAIN: 				"screen-main",
@@ -39,6 +40,13 @@ let screenDescs = Object.freeze(Object.keys(SCREEN_ID)
 		});
 		// Perform some sneaky initialization inside `Array.map`.
 		desc.bodyElem.style.display = "none";
+		desc.buttonElem.tabIndex = 0;
+		desc.buttonElem.addEventListener("pointerenter", (ev) => {
+			desc.buttonElem.focus();
+		});
+		desc.buttonElem.addEventListener("pointerleave", (ev) => {
+			desc.buttonElem.blur();
+		});
 		desc.buttonElem.onclick = (ev) => {
 			SWITCH_SCREEN(desc.id);
 		};
@@ -59,13 +67,14 @@ function SWITCH_SCREEN(targetId: SCREEN_ID): void {
 	const target = screenDescs[targetId];
 	if (target !== oldCur) {
 		target.bodyElem.style.display = ""; // Hand back control to CSS.
-		if (targetId !== SCREEN_ID.MAIN) {
-			target.buttonElem.style.borderColor = "var(--colour-mainFg)";
-		}
+		//if (targetId !== SCREEN_ID.MAIN) {
+			target.buttonElem.dataset["screenCurrent"] = ""; // exists.
+		//}
+		target.bodyElem.focus();
 		if (oldCur) {
 			// ^Check for edge-case (__CURRENT_SCREEN start off as undefined).
 			oldCur.bodyElem.style.display = "none";
-			oldCur.buttonElem.style.borderColor = "";
+			delete oldCur.buttonElem.dataset["screenCurrent"]; // delete.
 		}
 		__CURRENT_SCREEN = target;
 	}
