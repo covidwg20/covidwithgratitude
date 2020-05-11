@@ -2,5 +2,6 @@
 @import "colour/index.css";
 @import "fonts.css";
 @import "root.css";
-@import "nav.css";
-@import "mainscroll.css"
+@import "layout.css";
+@import "mainscroll.css";
+@import "contactinfo.css";

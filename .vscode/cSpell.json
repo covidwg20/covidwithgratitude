@@ -21,6 +21,7 @@
         "covid",
         "oikos",
 
+        "desc", "descs",
         "elem",
         "nsps",
         "retval",

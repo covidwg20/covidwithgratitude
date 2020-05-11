@@ -71,22 +71,44 @@ var SCREEN_ID = Object.freeze({
     TERMS_CONDITIONS: "screen-terms-and-conditions",
     PRIVACY_POLICY: "screen-privacy-policy",
 });
-function SWITCH_SCREEN(targetId) {
-    var oldScreen = __CURRENT_SCREEN;
-    var targetScreen = document.getElementById(targetId);
-    targetScreen.style.display = "";
-    if (oldScreen) {
-        oldScreen.style.display = "none";
-    }
-    __CURRENT_SCREEN = targetScreen;
-}
-Object.keys(SCREEN_ID).forEach(function (key) {
-    var targetId = SCREEN_ID[key];
-    document.getElementById("goto-" + targetId).onclick = function (ev) {
-        SWITCH_SCREEN(targetId);
+var screenDescs = Object.freeze(Object.keys(SCREEN_ID)
+    .map(function (jsScreenId) {
+    var screenId = SCREEN_ID[jsScreenId];
+    var desc = Object.freeze({
+        id: screenId,
+        bodyElem: document.getElementById(screenId),
+        buttonElem: document.getElementById("goto-" + screenId),
+    });
+    desc.bodyElem.style.display = "none";
+    desc.buttonElem.tabIndex = 0;
+    desc.buttonElem.addEventListener("pointerenter", function (ev) {
+        desc.buttonElem.focus();
+    });
+    desc.buttonElem.addEventListener("pointerleave", function (ev) {
+        desc.buttonElem.blur();
+    });
+    desc.buttonElem.onclick = function (ev) {
+        SWITCH_SCREEN(desc.id);
     };
-    document.getElementById(targetId).style.display = "none";
-});
+    return desc;
+}).reduce(function (build, screenDesc) {
+    build[screenDesc.id] = screenDesc;
+    return build;
+}, {}));
+function SWITCH_SCREEN(targetId) {
+    var oldCur = __CURRENT_SCREEN;
+    var target = screenDescs[targetId];
+    if (target !== oldCur) {
+        target.bodyElem.style.display = "";
+        target.buttonElem.dataset["screenCurrent"] = "";
+        target.bodyElem.focus();
+        if (oldCur) {
+            oldCur.bodyElem.style.display = "none";
+            delete oldCur.buttonElem.dataset["screenCurrent"];
+        }
+        __CURRENT_SCREEN = target;
+    }
+}
 SWITCH_SCREEN(SCREEN_ID.MAIN);
 var SUBMISSION_MODAL = document.getElementById("submission-modal");
 SUBMISSION_MODAL.addEventListener("keydown", function (ev) {
