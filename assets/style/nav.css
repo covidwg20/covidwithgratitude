@@ -1,16 +1,16 @@
 
-
 nav {
     z-index:        1000;
     position:       sticky;
     top:            0px;
 
     display:        flex;
-    flex-wrap:      wrap;
     justify-content: space-between;
     align-items:    stretch;
+    flex-wrap:      wrap;
+    overflow:       hidden;
 
-    font-size:      90%;
+    font-size:      0.9rem;
     background-color: var(--colour-white);
 }
 nav > .nav-side {
@@ -24,18 +24,18 @@ nav > .nav-side > * {
     padding:        0.7rem  1.0rem;
 }
 #nav-hashtag {
-    font-size:      190%;
+    font-size:      1.9rem;
     font-family:    playfair-display;
 }
 
 
 #main-motto {
-    padding:        0.8em;
+    padding:        0.8rem;
     font-style:     italic;
     background-color: var(--colour-tone0);
 }
 #main-blurb {
-    padding:        2em;
+    padding:        2rem;
     font-size:      75%;
     background-color: var(--colour-white);
 }
@@ -43,6 +43,8 @@ nav > .nav-side > * {
 
 footer {
     background-color: var(--colour-tone0);
+    padding:        0.4rem;
+    overflow:       hidden;
 }
 #social-media-links {
     display:            inline-grid;
@@ -62,3 +64,16 @@ footer {
 #social-ig { --mask-url: url("https://unpkg.com/simple-icons@v2/icons/instagram.svg"); }
 #social-tw { --mask-url: url("https://unpkg.com/simple-icons@v2/icons/twitter.svg");   }
 #social-fb { --mask-url: url("https://unpkg.com/simple-icons@v2/icons/facebook.svg");  }
+
+#legal-notices {
+    display:        flex;
+    flex-flow:      column;
+    align-items:    stretch;
+    font-size:      0.8rem;
+}
+#legal-notices > * {
+    padding:        0.2rem;
+    display:        flex;
+    flex-flow:      column;
+    align-items:    stretch;
+}

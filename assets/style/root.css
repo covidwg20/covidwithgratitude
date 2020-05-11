@@ -11,19 +11,31 @@ body {
     font-family:    "open-sans";
     color:          var(--colour-mainFg);
     text-align:     center;
+
+    background-color: var(--colour-white);
+
+    /* Make sure the footer always aligns to the
+    bottom of the viewport even if there isn't enough
+    content to push it there via overflow: */
+    display:        flex;
+    flex-flow:      column;
+    justify-content: space-between;
+    min-height:     100vh;
 }
 
 #submission-modal {
     visibility:     hidden;
+    position:       absolute;
 }
 .cwg-screen {
     /* Make sure that each display
     starts its own stacking context. */
-    contain:        strict;
-    position:       absolute;
-    overflow:       auto; /* Use Scrollbars */
-    top: 0; right: 0; bottom: 0; left: 0;
-    visibility:     hidden;
+    contain:        content;
+    position:       relative;
+    display:        none;
+}
+#screen-main {
+    display:        initial;
 }
 
 table {

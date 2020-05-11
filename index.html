@@ -19,9 +19,9 @@
 
 
     <body style="margin:0;">
-        <header></header>
     <!-- NAVIGATION -->
         <nav>
+        <!-- note: ID's for js to hook up navigation. -->
         <!-- left side -->
             <span class="nav-side">
                 <span id="nav-hashtag">#covidwithgratitude</span>
@@ -34,16 +34,21 @@
             </span>
         </nav>
     <!-- MAIN CONTENT -->
-        <div id="main">
+        <div class="cwg-screen" id="screen-main">
             <div id="sticky-detector"></div>
             <div id="main-motto">"staying in, staying thankful"</div>
             <div id="main-blurb">"[Our blurb]"</div>
-            <div class="main-scroll"></div>
+            <div id="main-scroll"></div>
         </div>
-    <!-- SUBMISSION MODAL -->
+    <!-- VIEW SUBMISSION MODAL -->
         <div id="submission-modal"></div>
-    <!-- ABOUT US SCREEN -->
-        <div class="cwg-screen" id="screen-about-us">
+    <!-- CONTRIBUTE SCREEN -->
+        <div class="cwg-screen" id="screen-contribute">
+            Contribute - Lorem Ipsum
+        </div>
+    <!-- CONTACT US SCREEN -->
+        <div class="cwg-screen" id="screen-contact-info">
+            Contact - Lorem Ipsum
         </div>
     <!-- FOOTER -->
         <footer>
@@ -54,8 +59,12 @@
                 <a id="social-fb" rel="noopener" href=""></a>
             </span>
         <!-- LEGAL NOTICES -->
-            <span id="legal-notices"></span>
+            <span id="legal-notices">
+                <!-- note: ID's for js to hook up navigation -->
+                <span id="terms-and-conditions">Terms & Conditions</span>
+                <span id="privacy-policy">Privacy Policy</span>
+            </span>
         </footer>
-        <script defer src="dist/ts/src/index.js"></script>
+    <script defer src="dist/ts/src/index.js"></script>
     </body>
 </html>

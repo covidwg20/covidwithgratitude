@@ -47,7 +47,7 @@ class MainScroll {
     private readonly slots: MainScroll.Slot[];
 
     public constructor() {
-        this.artHostElem = document.querySelector(".main-scroll") as HTMLElement;
+        this.artHostElem = document.getElementById("main-scroll")!;
         this.svgTemplate = makeRequest(MainScroll.ARTWORK_SVG_URL).then((xhr) => {
             return xhr.responseXML!.documentElement!;
         }) as Promise<SVGSVGElement>;
