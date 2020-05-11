@@ -116,7 +116,7 @@ namespace MainScroll {
         public constructor(id: Slot.Id, rect: SVGRectElement) {
             this.shapeRect = rect;
             const base = this.baseElem = document.createElementNS(SVG_NSPS, "svg");
-            base.classList.add("submission");
+            base.classList.add("submission", "text-select-disabled");
             const bsa = base.setAttribute.bind(base);
             bsa(     "x", rect.x.baseVal.valueAsString);
             bsa(     "y", rect.y.baseVal.valueAsString);

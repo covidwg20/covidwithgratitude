@@ -1,26 +1,29 @@
 
 
-#nav {
+nav {
     z-index:        1000;
     position:       sticky;
     top:            0px;
+
     display:        flex;
+    flex-wrap:      wrap;
     justify-content: space-between;
     align-items:    stretch;
 
     font-size:      90%;
     background-color: var(--colour-white);
 }
-#nav > */*(L/R sides)*/ {
+nav > .nav-side {
     display:        flex;
     align-items:    stretch;
 }
-#nav > */*(L/R sides)*/ > * {
+nav > .nav-side > * {
+    cursor:         pointer;
     display:        flex;
     align-items:    center;
     padding:        0.7rem  1.0rem;
 }
-#nav__hashtag {
+#nav-hashtag {
     font-size:      190%;
     font-family:    playfair-display;
 }
@@ -36,3 +39,26 @@
     font-size:      75%;
     background-color: var(--colour-white);
 }
+
+
+footer {
+    background-color: var(--colour-tone0);
+}
+#social-media-links {
+    display:            inline-grid;
+    /* grid-auto-columns:  3rem;
+    grid-template-rows: 3rem; */
+    grid-auto-flow:     column;
+}
+#social-media-links > * {
+    --dimensions:       2.5rem;
+    margin:             calc(0.2 * var(--dimensions));
+    height:             var(--dimensions);
+    width:              var(--dimensions);
+    -webkit-mask-image: var(--mask-url);
+    mask-image:         var(--mark-url);
+    background-color:   var(--colour-mainFg);
+}
+#social-ig { --mask-url: url("https://unpkg.com/simple-icons@v2/icons/instagram.svg"); }
+#social-tw { --mask-url: url("https://unpkg.com/simple-icons@v2/icons/twitter.svg");   }
+#social-fb { --mask-url: url("https://unpkg.com/simple-icons@v2/icons/facebook.svg");  }
