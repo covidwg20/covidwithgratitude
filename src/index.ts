@@ -21,6 +21,35 @@ async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttp
     });
 };
 
+let __CURRENT_SCREEN: HTMLElement = undefined!;
+const SCREEN_ID = Object.freeze(<const>{
+	MAIN: 				"screen-main",
+	CONTRIBUTE: 		"screen-contribute",
+	CONTACT: 			"screen-contact-info",
+	TERMS_CONDITIONS:	"screen-terms-and-conditions",
+	PRIVACY_POLICY: 	"screen-privacy-policy",
+});
+type SCREEN_ID = typeof SCREEN_ID[keyof typeof SCREEN_ID];
+function SWITCH_SCREEN(targetId: SCREEN_ID): void {
+	const oldScreen = __CURRENT_SCREEN;
+	const targetScreen = document.getElementById(targetId)!;
+	targetScreen.style.display = "";
+	if (oldScreen) {
+		// ^Check for edge-case (__CURRENT_SCREEN start off as undefined).
+		oldScreen.style.display = "none";
+	}
+	__CURRENT_SCREEN = targetScreen;
+}
+// Open the default screen (and hide all others):
+Object.keys(SCREEN_ID).forEach((key) => {
+	const targetId = SCREEN_ID[key];
+	document.getElementById("goto-" + targetId)!.onclick = (ev) => {
+		SWITCH_SCREEN(targetId);
+	};
+	document.getElementById(targetId)!.style.display = "none";
+});
+SWITCH_SCREEN(SCREEN_ID.MAIN);
+
 
 const SUBMISSION_MODAL = document.getElementById("submission-modal")!;
 SUBMISSION_MODAL.addEventListener("keydown", (ev) => {
@@ -47,7 +76,7 @@ class MainScroll {
     private readonly slots: MainScroll.Slot[];
 
     public constructor() {
-        this.artHostElem = document.querySelector(".main-scroll") as HTMLElement;
+        this.artHostElem = document.getElementById("main-scroll")!;
         this.svgTemplate = makeRequest(MainScroll.ARTWORK_SVG_URL).then((xhr) => {
             return xhr.responseXML!.documentElement!;
         }) as Promise<SVGSVGElement>;

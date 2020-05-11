@@ -63,6 +63,31 @@ function makeRequest(url, method) {
     });
 }
 ;
+var __CURRENT_SCREEN = undefined;
+var SCREEN_ID = Object.freeze({
+    MAIN: "screen-main",
+    CONTRIBUTE: "screen-contribute",
+    CONTACT: "screen-contact-info",
+    TERMS_CONDITIONS: "screen-terms-and-conditions",
+    PRIVACY_POLICY: "screen-privacy-policy",
+});
+function SWITCH_SCREEN(targetId) {
+    var oldScreen = __CURRENT_SCREEN;
+    var targetScreen = document.getElementById(targetId);
+    targetScreen.style.display = "";
+    if (oldScreen) {
+        oldScreen.style.display = "none";
+    }
+    __CURRENT_SCREEN = targetScreen;
+}
+Object.keys(SCREEN_ID).forEach(function (key) {
+    var targetId = SCREEN_ID[key];
+    document.getElementById("goto-" + targetId).onclick = function (ev) {
+        SWITCH_SCREEN(targetId);
+    };
+    document.getElementById(targetId).style.display = "none";
+});
+SWITCH_SCREEN(SCREEN_ID.MAIN);
 var SUBMISSION_MODAL = document.getElementById("submission-modal");
 SUBMISSION_MODAL.addEventListener("keydown", function (ev) {
     if (ev.key === "Escape") {
@@ -76,7 +101,7 @@ SUBMISSION_MODAL.addEventListener("click", function (ev) {
 });
 var MainScroll = (function () {
     function MainScroll() {
-        this.artHostElem = document.querySelector(".main-scroll");
+        this.artHostElem = document.getElementById("main-scroll");
         this.svgTemplate = makeRequest(MainScroll.ARTWORK_SVG_URL).then(function (xhr) {
             return xhr.responseXML.documentElement;
         });

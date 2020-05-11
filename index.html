@@ -19,31 +19,44 @@
 
 
     <body style="margin:0;">
-        <header></header>
     <!-- NAVIGATION -->
         <nav>
+        <!-- note: ID's for js to hook up navigation. -->
         <!-- left side -->
             <span class="nav-side">
-                <span id="nav-hashtag">#covidwithgratitude</span>
+                <span id="goto-screen-main" class="nav-hashtag">#covidwithgratitude</span>
             </span>
         <!-- right side -->
             <span class="nav-side">
-                <span id="nav-contribute"><span>Contribute</span></span>
-                <span id="nav-contact"><span>Contact</span></span>
+                <span id="goto-screen-contribute"><span>Contribute</span></span>
+                <span id="goto-screen-contact-info"><span>Contact</span></span>
                 <!-- TODO logo goes here -->
             </span>
         </nav>
     <!-- MAIN CONTENT -->
-        <div id="main">
+        <div class="cwg-screen" id="screen-main">
             <div id="sticky-detector"></div>
             <div id="main-motto">"staying in, staying thankful"</div>
             <div id="main-blurb">"[Our blurb]"</div>
-            <div class="main-scroll"></div>
+            <div id="main-scroll"></div>
         </div>
-    <!-- SUBMISSION MODAL -->
+    <!-- VIEW SUBMISSION MODAL -->
         <div id="submission-modal"></div>
-    <!-- ABOUT US SCREEN -->
-        <div class="cwg-screen" id="screen-about-us">
+    <!-- CONTRIBUTE SCREEN -->
+        <div class="cwg-screen" id="screen-contribute">
+            Contribute - Lorem Ipsum
+        </div>
+    <!-- CONTACT US SCREEN -->
+        <div class="cwg-screen" id="screen-contact-info">
+            Contact - Lorem Ipsum
+        </div>
+    <!-- TERMS & CONDITIONS SCREEN -->
+        <div class="cwg-screen" id="screen-terms-and-conditions">
+            Terms and Conditions - Lorem Ipsum
+        </div>
+    <!-- PRIVACY POLICY SCREEN -->
+        <div class="cwg-screen" id="screen-privacy-policy">
+            Privacy Policy - Lorem Ipsum
         </div>
     <!-- FOOTER -->
         <footer>
@@ -54,8 +67,12 @@
                 <a id="social-fb" rel="noopener" href=""></a>
             </span>
         <!-- LEGAL NOTICES -->
-            <span id="legal-notices"></span>
+            <span id="legal-notices">
+                <!-- note: ID's for js to hook up navigation -->
+                <span id="goto-screen-terms-and-conditions">Terms & Conditions</span>
+                <span id="goto-screen-privacy-policy">Privacy Policy</span>
+            </span>
         </footer>
-        <script defer src="dist/ts/src/index.js"></script>
+    <script defer src="dist/ts/src/index.js"></script>
     </body>
 </html>

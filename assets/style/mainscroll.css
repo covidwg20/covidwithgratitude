@@ -1,8 +1,11 @@
 
-.main-scroll {
+/* TODO do we still need the padding design team
+makes the artwork background? */
+#main-scroll {
     contain:            content;
     pointer-events:     none;
     position:           relative;
+    padding:            0.5rem;
     display:            grid;
  /* background-size:    cover;
     background-repeat:  repeat;
@@ -10,7 +13,7 @@
     background-color: var(--colour-blue);
 }
 
-.main-scroll:focus-within {
+#main-scroll:focus-within {
     filter: blur(5px);
 }
 
@@ -33,4 +36,9 @@
 .submission__image {
     pointer-events: all;
     transition: transform 0.25s ease-out;
+}
+
+#submission-modal {
+    visibility:     hidden;
+    position:       absolute;
 }
