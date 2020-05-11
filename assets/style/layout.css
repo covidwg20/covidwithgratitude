@@ -1,6 +1,18 @@
 
 [id^="goto-screen"] {
     cursor:         pointer;
+    contain:        content;
+
+    transition-property: filter, border;
+    transition-duration: 0.35s;
+    transition-timing-function: ease-in-out;
+
+    border-color:   transparent;
+    border-style:   solid;
+    border-width: 0rem  0rem  0.2rem  0rem
+}
+[id^="goto-screen"]:hover {
+    border-color:   var(--colour-mainFg);
 }
 
 nav {
@@ -20,11 +32,13 @@ nav {
 nav > .nav-side {
     display:        flex;
     align-items:    stretch;
+    background-color: inherit;
 }
 nav > .nav-side > * {
     display:        flex;
     align-items:    center;
     padding:        0.7rem  1.0rem;
+    background-color: inherit;
 }
 .nav-hashtag {
     font-size:      1.9rem;
@@ -73,6 +87,7 @@ footer {
     flex-flow:      column;
     align-items:    stretch;
     font-size:      0.8rem;
+    background-color: inherit;
 }
 #legal-notices > * {
     padding:        0.2rem;

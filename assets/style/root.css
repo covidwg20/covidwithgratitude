@@ -17,9 +17,8 @@ body {
     /* Make sure the footer always aligns to the
     bottom of the viewport even if there isn't enough
     content to push it there via overflow: */
-    display:        flex;
-    flex-flow:      column;
-    justify-content: space-between;
+    display:        grid;
+    align-content:  space-between;
     min-height:     100vh;
 }
 

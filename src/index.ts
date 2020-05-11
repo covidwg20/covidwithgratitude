@@ -21,7 +21,7 @@ async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttp
     });
 };
 
-let __CURRENT_SCREEN: HTMLElement = undefined!;
+let __CURRENT_SCREEN: ScreenDesc = undefined!;
 const SCREEN_ID = Object.freeze(<const>{
 	MAIN: 				"screen-main",
 	CONTRIBUTE: 		"screen-contribute",
@@ -29,25 +29,48 @@ const SCREEN_ID = Object.freeze(<const>{
 	TERMS_CONDITIONS:	"screen-terms-and-conditions",
 	PRIVACY_POLICY: 	"screen-privacy-policy",
 });
+let screenDescs = Object.freeze(Object.keys(SCREEN_ID)
+	.map<ScreenDesc>((jsScreenId) => {
+		const screenId = SCREEN_ID[jsScreenId];
+		const desc = Object.freeze({
+			id:			screenId,
+			bodyElem: 	document.getElementById(screenId)!,
+			buttonElem: document.getElementById("goto-" + screenId)!,
+		});
+		// Perform some sneaky initialization inside `Array.map`.
+		desc.bodyElem.style.display = "none";
+		desc.buttonElem.onclick = (ev) => {
+			SWITCH_SCREEN(desc.id);
+		};
+		return desc;
+	}).reduce<{[SID in SCREEN_ID]: ScreenDesc}>((build, screenDesc) => {
+		build[screenDesc.id] = screenDesc;
+		return build;
+	}, {} as any)
+);
 type SCREEN_ID = typeof SCREEN_ID[keyof typeof SCREEN_ID];
+type ScreenDesc = Readonly<{
+	id: 		SCREEN_ID;
+	bodyElem: 	HTMLElement;
+	buttonElem: HTMLElement;
+}>;
 function SWITCH_SCREEN(targetId: SCREEN_ID): void {
-	const oldScreen = __CURRENT_SCREEN;
-	const targetScreen = document.getElementById(targetId)!;
-	targetScreen.style.display = "";
-	if (oldScreen) {
-		// ^Check for edge-case (__CURRENT_SCREEN start off as undefined).
-		oldScreen.style.display = "none";
+	const oldCur = __CURRENT_SCREEN;
+	const target = screenDescs[targetId];
+	if (target !== oldCur) {
+		target.bodyElem.style.display = ""; // Hand back control to CSS.
+		if (targetId !== SCREEN_ID.MAIN) {
+			target.buttonElem.style.borderColor = "var(--colour-mainFg)";
+		}
+		if (oldCur) {
+			// ^Check for edge-case (__CURRENT_SCREEN start off as undefined).
+			oldCur.bodyElem.style.display = "none";
+			oldCur.buttonElem.style.borderColor = "";
+		}
+		__CURRENT_SCREEN = target;
 	}
-	__CURRENT_SCREEN = targetScreen;
 }
-// Open the default screen (and hide all others):
-Object.keys(SCREEN_ID).forEach((key) => {
-	const targetId = SCREEN_ID[key];
-	document.getElementById("goto-" + targetId)!.onclick = (ev) => {
-		SWITCH_SCREEN(targetId);
-	};
-	document.getElementById(targetId)!.style.display = "none";
-});
+// Go to the default (main) screen:
 SWITCH_SCREEN(SCREEN_ID.MAIN);
 
 
