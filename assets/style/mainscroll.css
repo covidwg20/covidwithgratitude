@@ -37,3 +37,8 @@ makes the artwork background? */
     pointer-events: all;
     transition: transform 0.25s ease-out;
 }
+
+#submission-modal {
+    visibility:     hidden;
+    position:       absolute;
+}

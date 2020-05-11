@@ -1,4 +1,8 @@
 
+[id^="goto-screen"] {
+    cursor:         pointer;
+}
+
 nav {
     z-index:        1000;
     position:       sticky;
@@ -18,12 +22,11 @@ nav > .nav-side {
     align-items:    stretch;
 }
 nav > .nav-side > * {
-    cursor:         pointer;
     display:        flex;
     align-items:    center;
     padding:        0.7rem  1.0rem;
 }
-#nav-hashtag {
+.nav-hashtag {
     font-size:      1.9rem;
     font-family:    playfair-display;
 }

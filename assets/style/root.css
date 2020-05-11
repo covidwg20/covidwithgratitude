@@ -23,19 +23,12 @@ body {
     min-height:     100vh;
 }
 
-#submission-modal {
-    visibility:     hidden;
-    position:       absolute;
-}
+/* The CSS doesn't do much. The class is more to
+identify the element as a screen for the js to
+toggle whether or not it should be displayed. */
 .cwg-screen {
-    /* Make sure that each display
-    starts its own stacking context. */
     contain:        content;
     position:       relative;
-    display:        none;
-}
-#screen-main {
-    display:        initial;
 }
 
 table {
