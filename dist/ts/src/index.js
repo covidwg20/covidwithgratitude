@@ -63,20 +63,20 @@ function makeRequest(url, method) {
     });
 }
 ;
-var VIEW_SUBMISSION_SCREEN = document.getElementById("screen-view-submission");
-VIEW_SUBMISSION_SCREEN.addEventListener("keydown", function (ev) {
+var SUBMISSION_MODAL = document.getElementById("submission-modal");
+SUBMISSION_MODAL.addEventListener("keydown", function (ev) {
     if (ev.key === "Escape") {
-        VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+        SUBMISSION_MODAL.style.visibility = "hidden";
     }
 });
-VIEW_SUBMISSION_SCREEN.addEventListener("click", function (ev) {
-    if (ev.target === VIEW_SUBMISSION_SCREEN) {
-        VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+SUBMISSION_MODAL.addEventListener("click", function (ev) {
+    if (ev.target === SUBMISSION_MODAL) {
+        SUBMISSION_MODAL.style.visibility = "hidden";
     }
 });
 var MainScroll = (function () {
     function MainScroll() {
-        this.artHostElem = document.querySelector(".main-scroll__content");
+        this.artHostElem = document.querySelector(".main-scroll");
         this.svgTemplate = makeRequest(MainScroll.ARTWORK_SVG_URL).then(function (xhr) {
             return xhr.responseXML.documentElement;
         });
@@ -126,7 +126,7 @@ var MainScroll = (function () {
         function Slot(id, rect) {
             this.shapeRect = rect;
             var base = this.baseElem = document.createElementNS(SVG_NSPS, "svg");
-            base.classList.add("submission");
+            base.classList.add("submission", "text-select-disabled");
             var bsa = base.setAttribute.bind(base);
             bsa("x", rect.x.baseVal.valueAsString);
             bsa("y", rect.y.baseVal.valueAsString);
@@ -170,7 +170,7 @@ var MainScroll = (function () {
             configurable: true
         });
         Slot.prototype.displayFull = function () {
-            VIEW_SUBMISSION_SCREEN.style.visibility = "visible";
+            SUBMISSION_MODAL.style.visibility = "visible";
         };
         return Slot;
     }());

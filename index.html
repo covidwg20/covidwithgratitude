@@ -19,26 +19,43 @@
 
 
     <body style="margin:0;">
-        <div class="cwg-screen" id="background"></div>
-        <div class="cwg-screen" id="screen-main">
-            <!-- MAIN SCREEN -->
-            <header></header>
-            <nav class="main-nav">
-                <span class="main-nav__hashtag">#covidwithgratitude</span>
-            </nav>
-            <div class="main-motto">"staying in, staying thankful"</div>
-            <div class="main-blurb">"[Our blurb]"</div>
-            <div class="main-scroll">
-                <div class="main-scroll__sizer"></div>
-                <div class="main-scroll__content"></div>
-            </div>
+        <header></header>
+    <!-- NAVIGATION -->
+        <nav>
+        <!-- left side -->
+            <span class="nav-side">
+                <span id="nav-hashtag">#covidwithgratitude</span>
+            </span>
+        <!-- right side -->
+            <span class="nav-side">
+                <span id="nav-contribute"><span>Contribute</span></span>
+                <span id="nav-contact"><span>Contact</span></span>
+                <!-- TODO logo goes here -->
+            </span>
+        </nav>
+    <!-- MAIN CONTENT -->
+        <div id="main">
+            <div id="sticky-detector"></div>
+            <div id="main-motto">"staying in, staying thankful"</div>
+            <div id="main-blurb">"[Our blurb]"</div>
+            <div class="main-scroll"></div>
         </div>
-        <div class="cwg-screen" id="screen-view-submission">
-            <!-- VIEW-SUBMISSION SCREEN -->
-        </div>
+    <!-- SUBMISSION MODAL -->
+        <div id="submission-modal"></div>
+    <!-- ABOUT US SCREEN -->
         <div class="cwg-screen" id="screen-about-us">
-            <!-- ABOUT US SCREEN -->
         </div>
+    <!-- FOOTER -->
+        <footer>
+        <!-- SOCIAL MEDIA LINKS -->
+            <span id="social-media-links">
+                <a id="social-ig" rel="noopener" href=""></a>
+                <a id="social-tw" rel="noopener" href=""></a>
+                <a id="social-fb" rel="noopener" href=""></a>
+            </span>
+        <!-- LEGAL NOTICES -->
+            <span id="legal-notices"></span>
+        </footer>
         <script defer src="dist/ts/src/index.js"></script>
     </body>
 </html>

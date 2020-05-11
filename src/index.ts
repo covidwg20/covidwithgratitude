@@ -22,15 +22,15 @@ async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttp
 };
 
 
-const VIEW_SUBMISSION_SCREEN = document.getElementById("screen-view-submission")!;
-VIEW_SUBMISSION_SCREEN.addEventListener("keydown", (ev) => {
+const SUBMISSION_MODAL = document.getElementById("submission-modal")!;
+SUBMISSION_MODAL.addEventListener("keydown", (ev) => {
     if (ev.key === "Escape") {
-        VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+        SUBMISSION_MODAL.style.visibility = "hidden";
     }
 });
-VIEW_SUBMISSION_SCREEN.addEventListener("click", (ev) => {
-    if (ev.target === VIEW_SUBMISSION_SCREEN) {
-        VIEW_SUBMISSION_SCREEN.style.visibility = "hidden";
+SUBMISSION_MODAL.addEventListener("click", (ev) => {
+    if (ev.target === SUBMISSION_MODAL) {
+        SUBMISSION_MODAL.style.visibility = "hidden";
     }
 });
 
@@ -47,7 +47,7 @@ class MainScroll {
     private readonly slots: MainScroll.Slot[];
 
     public constructor() {
-        this.artHostElem = document.querySelector(".main-scroll__content") as HTMLElement;
+        this.artHostElem = document.querySelector(".main-scroll") as HTMLElement;
         this.svgTemplate = makeRequest(MainScroll.ARTWORK_SVG_URL).then((xhr) => {
             return xhr.responseXML!.documentElement!;
         }) as Promise<SVGSVGElement>;
@@ -116,7 +116,7 @@ namespace MainScroll {
         public constructor(id: Slot.Id, rect: SVGRectElement) {
             this.shapeRect = rect;
             const base = this.baseElem = document.createElementNS(SVG_NSPS, "svg");
-            base.classList.add("submission");
+            base.classList.add("submission", "text-select-disabled");
             const bsa = base.setAttribute.bind(base);
             bsa(     "x", rect.x.baseVal.valueAsString);
             bsa(     "y", rect.y.baseVal.valueAsString);
@@ -167,7 +167,7 @@ namespace MainScroll {
         }
 
         public displayFull(): void {
-            VIEW_SUBMISSION_SCREEN.style.visibility = "visible";
+            SUBMISSION_MODAL.style.visibility = "visible";
             // TODO.impl Put this submission's contents in the modal.
         }
     }
