@@ -4,6 +4,8 @@
 ## High Priority
 
 - Submission viewer's previous and next buttons navigation.
+- Implement submission fetching
+  - Look into the [GitHub-provided API](https://developer.github.com/v3/repos/contents/#get-contents).
 
 ## Maintenance
 

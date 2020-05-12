@@ -28,6 +28,12 @@ Array.from(document.getElementById("social-media-links")!.getElementsByTagName("
 	socialLink.onpointerenter = () => socialLink.focus();
 	socialLink.onpointerleave = () => socialLink.blur();
 });
+Array.from(document.getElementById("submission-view")!.getElementsByTagName("button"))
+.forEach((btn) => {
+	// Do this so we can use CSS' `focus-within` pseudo class specifier:
+	btn.onpointerenter = () => btn.focus();
+	btn.onpointerleave = () => btn.blur();
+});
 
 
 let __CURRENT_SCREEN: ScreenDesc = undefined!;
@@ -76,7 +82,7 @@ function SWITCH_SCREEN(targetId: SCREEN_ID): void {
 	if (target !== oldCur) {
 		target.bodyElem.style.display = ""; // Hand back control to CSS.
         target.buttonElem.dataset["screenCurrent"] = ""; // exists.
-        mainScroll?.modal.hideModal();
+        mainScroll?.hideModal();
 		if (oldCur) {
 			// ^Check for edge-case (__CURRENT_SCREEN start off as undefined).
 			oldCur.bodyElem.style.display = "none";
@@ -99,7 +105,10 @@ class MainScroll {
     public  readonly artHostElem: HTMLElement;
     private readonly svgTemplate: Promise<SVGSVGElement>;
 	private readonly slots: MainScroll.Slot[];
-	public  readonly modal: MainScroll.Modal;
+
+    modalElem:          HTMLElement;
+    modalImageElem:     HTMLImageElement;
+    modalMessageElem:   HTMLElement;
 
     public constructor() {
         this.artHostElem = document.getElementById("main-scroll")!;
@@ -114,12 +123,32 @@ class MainScroll {
         this.extendArtwork().then(() => {
 			// TODO.impl fill in with existing submissions.
 			// We can probably fetch a json file describing what submissions exist...?
-			mainScroll.fillSlot(0,"thepassionofchrist.png");
-		});
-		this.modal = new MainScroll.Modal();
+			mainScroll.fillSlot(0);
+			mainScroll.fillSlot(1);
+        });
+
+        // Initialize modal:
+        const modal
+            = this.modalElem
+            = document.getElementById("submission-modal")!;
+        modal.tabIndex = 0;
+        modal.addEventListener("keydown", (ev) => {
+            if (ev.key === "Escape") {
+                this.hideModal();
+            }
+        });
+        modal.addEventListener("click", (ev) => {
+            if (ev.target === modal) {
+                this.hideModal();
+            }
+        });
+        this.modalImageElem = (document.getElementById("submission-view-image") as HTMLImageElement);
+        this.modalMessageElem = document.getElementById("submission-view-message")!;
     }
 
     /**
+     * Adds another copy of the repeating artwork. Does not load up
+     * submission thumbnails.
      *
      * NOTE: We intentionally don't try to attach any submission
      * thumbnails before attaching the new extension to the DOM (which
@@ -133,7 +162,10 @@ class MainScroll {
         const __allSlots = Array.from(boxesLayer.children) as SVGRectElement[];
         // ^A nascent version of allSlots defined to allow getting `length / 2`.
         const prevNumSlots = this.slots.length;
-		const displayModal = this.modal.showModal.bind(this.modal);
+		const displayModal = (slotSelf: MainScroll.Slot) => {
+            this.setModalSubmission(slotSelf);
+            this.showModal();
+        };
 		const newSlots = __allSlots.splice(__allSlots.length / 2)
             // TODO.build ^Remove splice temp-fix if we solve the
             // duplicating issue from Adobe Illustrator's export.
@@ -155,13 +187,35 @@ class MainScroll {
     /**
      * Throws an error if the slot is not empty.
      */
-    // TODO.impl this should only need to take the slot id.
-    public fillSlot(slotId: MainScroll.Slot.Id, imageFilename: string): void {
-        // TODO.impl
+    public fillSlot(slotId: MainScroll.Slot.Id): void {
         const slot = this.slots[slotId];
         if (!slot.isEmpty) throw new Error(`slot \`${slotId}\` is already occupied`);
+
+        // TODO.impl get contents of GitHub submission folder named `slotId`.
         slot.__fill(imageFilename);
-	}
+    }
+
+    public setModalSubmission(slot: MainScroll.Slot): void {
+        // TODO.impl Put this submission's contents in the modal.
+        this.modalImageElem.src = slot.imageSource!;
+        this.modalMessageElem.innerText = slot.messageString!;
+    }
+    public showModal(): void {
+        // Make sure the padding-box excludes the nav bar:
+        this.modalElem.style.borderTopWidth =
+            document.getElementsByTagName("nav")[0]
+            .getBoundingClientRect().height + "px";
+
+        document.body.style.overflow = "hidden";
+        this.artHostElem.dataset["showModal"] = "";
+        this.modalElem.dataset["showModal"] = "";
+        this.modalElem.focus();
+    }
+    public hideModal(): void {
+        document.body.style.overflow = "";
+        delete this.artHostElem.dataset["showModal"];
+        delete this.modalElem.dataset["showModal"];
+    }
 }
 namespace MainScroll {
     // Set to fetch from GitHub repo because browsers don't like
@@ -173,12 +227,13 @@ namespace MainScroll {
     export class Slot {
         private readonly shapeRect: SVGRectElement;
         private readonly baseElem:  SVGSVGElement;
-		private __image: SVGImageElement | undefined;
-		private readonly displayModal: (slot: Slot) => void;
+        private __image: SVGImageElement | undefined;
+        private __messageString:  string | undefined;
+        private readonly displayModal: (self: Slot) => void;
 
         public constructor(
 			id: Slot.Id,
-			displayModal: (slot: Slot) => void,
+			displayModal: (self: Slot) => void,
 			rect: SVGRectElement,
 		) {
 			this.shapeRect = rect;
@@ -205,16 +260,13 @@ namespace MainScroll {
          * Do not use this directly. Use the wrapper defined in `MainScroll`.
          */
         // TODO.design This should take a slot id.
-        public __fill(imageFilename: string): void {
+        public __fill(imageFilename: string, messageString: string): void {
+            this.__messageString = messageString;
             const img = this.__image = document.createElementNS(SVG_NSPS, "image");
             img.classList.add("submission__image");
             img.tabIndex = 0; // Allow selection via tabbing and click.
             img.onclick = (ev) => {
-                if (this.isEmpty) {
-                    // TODO.design Handle submission request:
-                } else {
-                    this.displayModal(this);
-                }
+                this.displayModal(this);
             };
 
             const href = Slot.ASSETS_ROOT + imageFilename;
@@ -236,6 +288,9 @@ namespace MainScroll {
         public get imageSource(): string | undefined {
             return this.__image?.href.baseVal;
         }
+        public get messageString(): string | undefined {
+            return this.__messageString;
+        }
     }
     export namespace Slot {
         export type Id = number;
@@ -243,57 +298,6 @@ namespace MainScroll {
     }
     Object.freeze(Slot);
 	Object.freeze(Slot.prototype);
-
-	/**
-	 *
-	 */
-	export class Modal {
-        baseElem:       HTMLElement;
-        imageElem:      HTMLImageElement;
-        messageElem:    HTMLElement;
-        blurElem:       HTMLElement;
-		public constructor() {
-            const base
-                = this.baseElem
-                = document.getElementById("submission-modal")!;
-            this.blurElem = document.getElementById("main-scroll")!;
-            base.tabIndex = 0;
-			base.addEventListener("keydown", (ev) => {
-				if (ev.key === "Escape") {
-					this.hideModal();
-				}
-			});
-			base.addEventListener("click", (ev) => {
-				if (ev.target === base) {
-					this.hideModal();
-				}
-            });
-            this.imageElem = (document.getElementById("submission-view-image") as HTMLImageElement);
-            this.messageElem = document.getElementById("submission-view-message")!;
-		}
-        public showModal(slot: Slot): void {
-            // TODO.impl Put this submission's contents in the modal.
-            this.imageElem.src = slot.imageSource!;
-            this.messageElem.innerText = "thank you!";
-
-            // Make sure the padding-box excludes the nav bar:
-            this.baseElem.style.borderTopWidth =
-                document.getElementsByTagName("nav")[0]
-                .getBoundingClientRect().height + "px";
-
-            document.body.style.overflow = "hidden";
-            this.blurElem.dataset["showModal"] = "";
-            this.baseElem.dataset["showModal"] = "";
-            this.baseElem.focus();
-        }
-        public hideModal(): void {
-            document.body.style.overflow = "";
-            delete this.blurElem.dataset["showModal"];
-            delete this.baseElem.dataset["showModal"];
-        }
-	}
-	Object.freeze(Modal);
-	Object.freeze(Modal.prototype);
 }
 Object.freeze(MainScroll);
 Object.freeze(MainScroll.prototype);
