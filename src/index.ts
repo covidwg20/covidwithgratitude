@@ -22,6 +22,14 @@ async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttp
 };
 
 
+Array.from(document.getElementById("social-media-links")!.getElementsByTagName("a"))
+.forEach((socialLink) => {
+	// Do this so we can use CSS' `focus-within` pseudo class specifier:
+	socialLink.onpointerenter = () => socialLink.focus();
+	socialLink.onpointerleave = () => socialLink.blur();
+});
+
+
 let __CURRENT_SCREEN: ScreenDesc = undefined!;
 const SCREEN_ID = Object.freeze(<const>{
 	MAIN: 				"screen-main",
@@ -38,7 +46,7 @@ let screenDescs = Object.freeze(Object.keys(SCREEN_ID)
 			bodyElem: 	document.getElementById(screenId)!,
 			buttonElem: document.getElementById("goto-" + screenId)!,
 		});
-		// Perform some sneaky initialization inside `Array.map`.
+		// Perform some initialization inside `Array.map`.
 		desc.bodyElem.style.display = "none";
 		desc.buttonElem.tabIndex = 0;
 		desc.buttonElem.addEventListener("pointerenter", (ev) => {
@@ -67,10 +75,7 @@ function SWITCH_SCREEN(targetId: SCREEN_ID): void {
 	const target = screenDescs[targetId];
 	if (target !== oldCur) {
 		target.bodyElem.style.display = ""; // Hand back control to CSS.
-		//if (targetId !== SCREEN_ID.MAIN) {
-			target.buttonElem.dataset["screenCurrent"] = ""; // exists.
-		//}
-		target.bodyElem.focus();
+		target.buttonElem.dataset["screenCurrent"] = ""; // exists.
 		if (oldCur) {
 			// ^Check for edge-case (__CURRENT_SCREEN start off as undefined).
 			oldCur.bodyElem.style.display = "none";
@@ -83,19 +88,6 @@ function SWITCH_SCREEN(targetId: SCREEN_ID): void {
 SWITCH_SCREEN(SCREEN_ID.MAIN);
 
 
-const SUBMISSION_MODAL = document.getElementById("submission-modal")!;
-SUBMISSION_MODAL.addEventListener("keydown", (ev) => {
-    if (ev.key === "Escape") {
-        SUBMISSION_MODAL.style.visibility = "hidden";
-    }
-});
-SUBMISSION_MODAL.addEventListener("click", (ev) => {
-    if (ev.target === SUBMISSION_MODAL) {
-        SUBMISSION_MODAL.style.visibility = "hidden";
-    }
-});
-
-
 /**
  *
  */
@@ -105,7 +97,8 @@ SUBMISSION_MODAL.addEventListener("click", (ev) => {
 class MainScroll {
     public  readonly artHostElem: HTMLElement;
     private readonly svgTemplate: Promise<SVGSVGElement>;
-    private readonly slots: MainScroll.Slot[];
+	private readonly slots: MainScroll.Slot[];
+	private readonly modal: MainScroll.Modal;
 
     public constructor() {
         this.artHostElem = document.getElementById("main-scroll")!;
@@ -119,8 +112,13 @@ class MainScroll {
         this.slots = [];
         this.extendArtwork().then(() => {
 			// TODO.impl fill in with existing submissions.
+			// We can probably fetch a json file describing what submissions exist...?
 			mainScroll.fillSlot(0,"thepassionofchrist.png");
 		});
+		this.modal = new MainScroll.Modal(
+            document.getElementById("submission-modal")!,
+            this.artHostElem,
+        );
     }
 
     /**
@@ -137,15 +135,20 @@ class MainScroll {
         const __allSlots = Array.from(boxesLayer.children) as SVGRectElement[];
         // ^A nascent version of allSlots defined to allow getting `length / 2`.
         const prevNumSlots = this.slots.length;
-        const newSlots = __allSlots.splice(__allSlots.length / 2)
+		const displayModal = this.modal.showModal.bind(this.modal);
+		const newSlots = __allSlots.splice(__allSlots.length / 2)
             // TODO.build ^Remove splice temp-fix if we solve the
             // duplicating issue from Adobe Illustrator's export.
             // (The second half are unwanted duplicates of the first half).
 
-            // Sort by Y-position, breaking ties by X-position.
+			// Sort by Y-position, breaking ties by X-position.
             .map((rect) => Object.freeze({ rect, x: rect.x.baseVal.value, y: rect.y.baseVal.value, }))
             .sort((a,b) => a.x - b.x).sort((a,b) => a.y - b.y)
-            .map((desc, index) => new MainScroll.Slot(prevNumSlots + index, desc.rect));
+            .map((desc, index) => new MainScroll.Slot(
+				prevNumSlots + index,
+				displayModal,
+				desc.rect,
+			));
         this.slots.push(...newSlots);
 
         this.artHostElem.appendChild(newSvgCopy);
@@ -160,7 +163,7 @@ class MainScroll {
         const slot = this.slots[slotId];
         if (!slot.isEmpty) throw new Error(`slot \`${slotId}\` is already occupied`);
         slot.__fill(imageFilename);
-    }
+	}
 }
 namespace MainScroll {
     // Set to fetch from GitHub repo because browsers don't like
@@ -172,10 +175,16 @@ namespace MainScroll {
     export class Slot {
         private readonly shapeRect: SVGRectElement;
         private readonly baseElem:  SVGSVGElement;
-        private __image: SVGImageElement | undefined;
+		private __image: SVGImageElement | undefined;
+		private readonly displayModal: (slot: Slot) => void;
 
-        public constructor(id: Slot.Id, rect: SVGRectElement) {
-            this.shapeRect = rect;
+        public constructor(
+			id: Slot.Id,
+			displayModal: (slot: Slot) => void,
+			rect: SVGRectElement,
+		) {
+			this.shapeRect = rect;
+			this.displayModal = displayModal;
             const base = this.baseElem = document.createElementNS(SVG_NSPS, "svg");
             base.classList.add("submission", "text-select-disabled");
             const bsa = base.setAttribute.bind(base);
@@ -206,7 +215,7 @@ namespace MainScroll {
                 if (this.isEmpty) {
                     // TODO.design Handle submission request:
                 } else {
-                    this.displayFull();
+                    this.displayModal(this);
                 }
             };
 
@@ -226,18 +235,58 @@ namespace MainScroll {
         public get isEmpty(): boolean {
             return this.__image === undefined;
         }
-
-        public displayFull(): void {
-            SUBMISSION_MODAL.style.visibility = "visible";
-            // TODO.impl Put this submission's contents in the modal.
-        }
     }
     export namespace Slot {
         export type Id = number;
         export const ASSETS_ROOT = "assets/images/submissions/";
     }
     Object.freeze(Slot);
-    Object.freeze(Slot.prototype);
+	Object.freeze(Slot.prototype);
+
+	/**
+	 *
+	 */
+	export class Modal {
+        baseElem:       HTMLElement;
+        imageElem:      HTMLImageElement;
+        messageElem:    HTMLElement;
+        artworkElem:    HTMLElement;
+		public constructor(baseElem: HTMLElement, artworkElem: HTMLElement) {
+            this.baseElem = baseElem;
+            this.artworkElem = artworkElem;
+
+            baseElem.tabIndex = 0;
+			baseElem.addEventListener("keydown", (ev) => {
+				if (ev.key === "Escape") {
+					this.hideModal();
+				}
+			});
+			baseElem.addEventListener("click", (ev) => {
+				if (ev.target === baseElem) {
+					this.hideModal();
+				}
+			});
+		}
+        public showModal(slot: Slot): void {
+            // TODO.impl Put this submission's contents in the modal.
+            this.imageElem
+
+            // Make sure the padding-box excludes the nav bar:
+            this.baseElem.style.borderTopWidth =
+                document.getElementsByTagName("nav")[0]
+                .getBoundingClientRect().height + "px";
+
+            this.artworkElem.dataset["blur"] = "";
+            this.baseElem.style.visibility = "visible";
+            this.baseElem.focus();
+        }
+        public hideModal(): void {
+            this.baseElem.style.visibility = "hidden";
+            delete this.artworkElem.dataset["blur"];
+        }
+	}
+	Object.freeze(Modal);
+	Object.freeze(Modal.prototype);
 }
 Object.freeze(MainScroll);
 Object.freeze(MainScroll.prototype);

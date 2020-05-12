@@ -3,34 +3,34 @@
     cursor:         pointer;
     contain:        content;
 
-    transition-property: filter, border;
-    transition-duration: 0.35s;
-    transition-timing-function: ease-in-out;
-
     border-color:   transparent;
     border-style:   solid;
     border-width:   0.2rem  0rem;
+
+    transition-property: border-bottom-color;
+    transition-duration: 0.35s;
+    transition-timing-function: ease-in-out;
 }
 [id^="goto-screen"][data-screen-current] {
-    border-bottom-color:    var(--colour-mainFg-thin);
+    border-bottom-color: var(--colour-mainFg-thin);
 }
 /* js auto-focuses these on pointer-entry */
 [id^="goto-screen"]:focus {
     outline:        none;
-    border-bottom-color:   var(--colour-mainFg);
+    border-bottom-color: var(--colour-mainFg);
 }
 
 nav {
     z-index:        1000;
     position:       sticky;
     top:            0px;
-    padding:        0rem  0.8rem;
+    overflow:       hidden;
+    padding:        0rem  0.5rem;
 
     display:        flex;
     justify-content: space-between;
     align-items:    stretch;
     flex-wrap:      wrap;
-    overflow:       hidden;
 
     font-size:      0.9rem;
     background-color: var(--colour-white);
@@ -43,7 +43,8 @@ nav > .nav-side {
 nav > .nav-side > * {
     display:        flex;
     align-items:    center;
-    padding:        0.7rem  1.0rem;
+    margin:         0.2rem;
+    padding:        0.5rem  1.0rem;
     background-color: inherit;
 }
 .nav-hashtag {
@@ -55,6 +56,10 @@ nav > .nav-side > * {
 @media screen and (max-aspect-ratio: 2/3) {
     nav {
         padding:    0rem  0rem;
+        font-size:  0.75rem;
+    }
+    nav > .nav-side > * {
+        padding:    0.3rem  1.0rem;
     }
 }
 
@@ -93,6 +98,10 @@ footer {
     -webkit-mask-image: var(--mask-url);
     mask-image:         var(--mark-url);
     background-color:   var(--colour-mainFg);
+    transition: background-color 0.35s ease-in-out;
+}
+#social-media-links:focus-within > :not(:focus) {
+    background-color:   var(--colour-mainFg-thin);
 }
 #social-ig { --mask-url: url("https://unpkg.com/simple-icons@v2/icons/instagram.svg"); }
 #social-tw { --mask-url: url("https://unpkg.com/simple-icons@v2/icons/twitter.svg");   }

@@ -18,8 +18,22 @@ body {
     bottom of the viewport even if there isn't enough
     content to push it there via overflow: */
     display:        grid;
+    grid-template:
+        "nav" max-content
+        "main" auto
+        "footer" max-content
+        / 1fr;
     align-content:  space-between;
     min-height:     100vh;
+}
+body > * {
+    grid-area: main;
+}
+body > nav {
+    grid-area: nav;
+}
+body > footer {
+    grid-area: footer;
 }
 
 /* The CSS doesn't do much. The class is more to
