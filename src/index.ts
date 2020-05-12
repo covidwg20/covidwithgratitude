@@ -30,7 +30,7 @@ class GitHubFiles {
     }[]> {
         const url = new window.URL(this.urlGetContents);
         url.pathname += path;
-        return (await makeRequest(url.href)).response;
+        return JSON.parse((await makeRequest(url.href)).response);
     }
 }
 const GITHUB_FILES = new GitHubFiles(
@@ -136,11 +136,13 @@ class MainScroll {
             xml.setAttribute("dominant-baseline", "middle");
         });
         this.slots = [];
-        this.extendArtwork().then(() => {
-			// TODO.impl fill in with existing submissions.
-			// We can probably fetch a json file describing what submissions exist...?
-			mainScroll.fillSlot(0);
-			mainScroll.fillSlot(1);
+
+        ;
+        GITHUB_FILES.getDirContents(MainScroll.Slot.SUBMISSIONS_ROOT)
+        .then((submissions) => {
+            submissions.forEach((submission) => {
+                this.fillSlot(Number(submission.name))
+            });
         });
 
         // Initialize modal:
@@ -204,9 +206,17 @@ class MainScroll {
      * Throws an error if the slot is not empty.
      */
     public fillSlot(slotId: MainScroll.Slot.Id): void {
-        const slot = this.slots[slotId];
-        if (!slot.isEmpty) throw new Error(`slot \`${slotId}\` is already occupied`);
-        slot.__fill();
+        if (slotId < this.slots.length) {
+            const slot = this.slots[slotId];
+            if (!slot.isEmpty) throw new Error(`slot \`${slotId}\` is already occupied`);
+            slot.__fill();
+        } else {
+            this.extendArtwork().then(() => {
+                // Recurse, extending the artwork once each time until
+                // the slot to be filled exists:
+                this.fillSlot(slotId);
+            });
+        }
     }
 
     public setModalSubmission(slot: MainScroll.Slot): void {
@@ -275,11 +285,11 @@ namespace MainScroll {
          */
         public __fill(): void {
             makeRequest(GITHUB_FILES.urlGetRaw
-                + Slot.ASSETS_ROOT + this.id + "/message.txt").then((xhr) => {
+                + Slot.SUBMISSIONS_ROOT + this.id + "/message.txt").then((xhr) => {
                 this.__messageString = xhr.responseText;
             })
             const img = this.__image = document.createElementNS(SVG_NSPS, "image");
-            GITHUB_FILES.getDirContents(Slot.ASSETS_ROOT + this.id).then((files) => {
+            GITHUB_FILES.getDirContents(Slot.SUBMISSIONS_ROOT + this.id).then((files) => {
                 const href = files.find((file) => file.path.match(IMAGE_REGEXP))!.path;
                 img.setAttributeNS(XLINK_NSPS, "href", href);
 
@@ -312,7 +322,7 @@ namespace MainScroll {
     }
     export namespace Slot {
         export type Id = number;
-        export const ASSETS_ROOT = "assets/images/submissions/";
+        export const SUBMISSIONS_ROOT = "assets/submissions/";
     }
     Object.freeze(Slot);
 	Object.freeze(Slot.prototype);

@@ -25,6 +25,7 @@
         "elem",
         "nsps",
         "retval",
+        "recurse",
         "sizer",
         "viewbox",
 
