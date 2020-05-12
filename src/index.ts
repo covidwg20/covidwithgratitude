@@ -120,7 +120,7 @@ SWITCH_SCREEN(SCREEN_ID.MAIN);
 class MainScroll {
     public  readonly artHostElem: HTMLElement;
     private readonly svgTemplate: Promise<SVGSVGElement>;
-	private readonly slots: MainScroll.Slot[];
+    private readonly slots: MainScroll.Slot[];
 
     modalElem:          HTMLElement;
     modalImageElem:     HTMLImageElement;
@@ -138,10 +138,11 @@ class MainScroll {
         this.slots = [];
 
         ;
-        GITHUB_FILES.getDirContents(MainScroll.Slot.SUBMISSIONS_ROOT)
+        makeRequest(MainScroll.Slot.SUBMISSIONS_ROOT + "existing.json")
+        .then((xhr) => JSON.parse(xhr.response))
         .then((submissions) => {
-            submissions.forEach((submission) => {
-                this.fillSlot(Number(submission.name))
+            Object.keys(submissions).forEach((id) => {
+                this.fillSlot(Number(id), submissions[id]);
             });
         });
 
@@ -205,16 +206,16 @@ class MainScroll {
     /**
      * Throws an error if the slot is not empty.
      */
-    public fillSlot(slotId: MainScroll.Slot.Id): void {
+    public fillSlot(slotId: MainScroll.Slot.Id, imageFileName: string): void {
         if (slotId < this.slots.length) {
             const slot = this.slots[slotId];
             if (!slot.isEmpty) throw new Error(`slot \`${slotId}\` is already occupied`);
-            slot.__fill();
+            slot.__fill(imageFileName);
         } else {
             this.extendArtwork().then(() => {
                 // Recurse, extending the artwork once each time until
                 // the slot to be filled exists:
-                this.fillSlot(slotId);
+                this.fillSlot(slotId, imageFileName);
             });
         }
     }
@@ -278,37 +279,32 @@ namespace MainScroll {
             base.appendChild(idText);
 
             // Attach base element to svg/xml document.
+            // It should go after since SVG1 uses xml-tree order to determine
+            // paint-order, and we want it to go _on top_ of the slot rectangle.
             rect.insertAdjacentElement("afterend", base);
         }
         /**
          * Do not use this directly. Use the wrapper defined in `MainScroll`.
          */
-        public __fill(): void {
-            makeRequest(GITHUB_FILES.urlGetRaw
-                + Slot.SUBMISSIONS_ROOT + this.id + "/message.txt").then((xhr) => {
+        public __fill(imageFileName: string): void {
+            makeRequest(/* GITHUB_FILES.urlGetRaw
+                +  */Slot.SUBMISSIONS_ROOT + this.id + "/message.txt").then((xhr) => {
                 this.__messageString = xhr.responseText;
             })
             const img = this.__image = document.createElementNS(SVG_NSPS, "image");
-            GITHUB_FILES.getDirContents(Slot.SUBMISSIONS_ROOT + this.id).then((files) => {
-                const href = files.find((file) => file.path.match(IMAGE_REGEXP))!.path;
-                img.setAttributeNS(XLINK_NSPS, "href", href);
-
-                this.baseElem.appendChild(img);
-            });
-
             img.classList.add("submission__image");
             img.tabIndex = 0; // Allow selection via tabbing and click.
             img.onclick = (ev) => {
                 this.displayModal(this);
             };
+            img.setAttributeNS(XLINK_NSPS, "href", imageFileName);
             const isa = img.setAttribute.bind(img);
             isa(     "x", "-50");
             isa(     "y", "-50");
             isa("height", "100");
             isa( "width", "100");
             isa("preserveAspectRatio", "xMidYMid slice");
-            // It should go after since SVG1 uses xml-tree order to determine
-            // paint-order, and we want it to go _on top_ of the slot rectangle.
+            this.baseElem.appendChild(img);
         }
         public get isEmpty(): boolean {
             return this.__image === undefined;
