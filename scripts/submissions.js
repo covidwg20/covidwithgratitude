@@ -6,8 +6,11 @@ const smbDirs = fs.readdirSync(sbmRoot);
 const jsonObj = {};
 
 smbDirs.forEach((sbmDirName) => {
-    jsonObj[sbmDirName] = fs.readdirSync(path.resolve(sbmRoot, sbmDirName))
-    .find((fileName) => fileName.match(/.((png)|(jpg)|(jpeg))$/i));
+    const sbmDirPath = path.resolve(sbmRoot, sbmDirName);
+    if (fs.lstatSync(sbmDirPath).isDirectory()) {
+        jsonObj[sbmDirName] = fs.readdirSync(sbmDirPath)
+        .find((fileName) => fileName.match(/.((png)|(jpg)|(jpeg))$/i));
+    }
 });
 fs.writeFile(
     path.resolve(sbmRoot, "existing.json"),
