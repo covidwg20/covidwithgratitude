@@ -1,9 +1,6 @@
 const SVG_NSPS   = "http://www.w3.org/2000/svg";
 const XLINK_NSPS = "http://www.w3.org/1999/xlink";
-
-// TODO if repo moves to organization, update link.
-const GITHUB_RAW = (window.origin != "null") ? ""
-    : "https://raw.githubusercontent.com/david-fong/CovidWithGratitude/dev/";
+const IMAGE_REGEXP = /.((png)|(jpg)|(jpeg))$/i;
 
 async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttpRequest> {
     var request = new XMLHttpRequest();
@@ -20,6 +17,25 @@ async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttp
         request.send();
     });
 };
+class GitHubFiles {
+    public  readonly urlGetRaw: string;
+    private readonly urlGetContents: string;
+    public constructor(desc: { repoOwner: string; repoName: string; branch: string; }) {
+        this.urlGetRaw = `https://raw.githubusercontent.com/${desc.repoOwner}/${desc.repoName}/${desc.branch}/`;
+        this.urlGetContents = `https://api.github.com/repos/${desc.repoOwner}/${desc.repoName}/contents/?ref=${desc.branch}`;
+    }
+    public async getDirContents(path: string): Promise<{
+        name: string,
+        path: string,
+    }[]> {
+        const url = new window.URL(this.urlGetContents);
+        url.pathname += path;
+        return (await makeRequest(url.href)).response;
+    }
+}
+const GITHUB_FILES = new GitHubFiles(
+    { repoOwner: "david-fong", repoName: "CovidWithGratitude", branch: "dev" },
+);
 
 
 Array.from(document.getElementById("social-media-links")!.getElementsByTagName("a"))
@@ -190,13 +206,11 @@ class MainScroll {
     public fillSlot(slotId: MainScroll.Slot.Id): void {
         const slot = this.slots[slotId];
         if (!slot.isEmpty) throw new Error(`slot \`${slotId}\` is already occupied`);
-
-        // TODO.impl get contents of GitHub submission folder named `slotId`.
-        slot.__fill(imageFilename);
+        slot.__fill();
     }
 
     public setModalSubmission(slot: MainScroll.Slot): void {
-        // TODO.impl Put this submission's contents in the modal.
+        // TODO.impl Hook this up with the prev/next buttons in the submission modal.
         this.modalImageElem.src = slot.imageSource!;
         this.modalMessageElem.innerText = slot.messageString!;
     }
@@ -220,12 +234,12 @@ class MainScroll {
 namespace MainScroll {
     // Set to fetch from GitHub repo because browsers don't like
     // XHR without HTTPS (because it may not be safe from attackers).
-    export const ARTWORK_SVG_URL = GITHUB_RAW + "assets/images/houses.svg";
+    export const ARTWORK_SVG_URL = GITHUB_FILES.urlGetRaw + "assets/images/houses.svg";
     /**
      *
      */
     export class Slot {
-        private readonly shapeRect: SVGRectElement;
+        public  readonly id: Slot.Id;
         private readonly baseElem:  SVGSVGElement;
         private __image: SVGImageElement | undefined;
         private __messageString:  string | undefined;
@@ -236,7 +250,7 @@ namespace MainScroll {
 			displayModal: (self: Slot) => void,
 			rect: SVGRectElement,
 		) {
-			this.shapeRect = rect;
+            this.id = id;
 			this.displayModal = displayModal;
             const base = this.baseElem = document.createElementNS(SVG_NSPS, "svg");
             base.classList.add("submission", "text-select-disabled");
@@ -259,26 +273,30 @@ namespace MainScroll {
         /**
          * Do not use this directly. Use the wrapper defined in `MainScroll`.
          */
-        // TODO.design This should take a slot id.
-        public __fill(imageFilename: string, messageString: string): void {
-            this.__messageString = messageString;
+        public __fill(): void {
+            makeRequest(GITHUB_FILES.urlGetRaw
+                + Slot.ASSETS_ROOT + this.id + "/message.txt").then((xhr) => {
+                this.__messageString = xhr.responseText;
+            })
             const img = this.__image = document.createElementNS(SVG_NSPS, "image");
+            GITHUB_FILES.getDirContents(Slot.ASSETS_ROOT + this.id).then((files) => {
+                const href = files.find((file) => file.path.match(IMAGE_REGEXP))!.path;
+                img.setAttributeNS(XLINK_NSPS, "href", href);
+
+                this.baseElem.appendChild(img);
+            });
+
             img.classList.add("submission__image");
             img.tabIndex = 0; // Allow selection via tabbing and click.
             img.onclick = (ev) => {
                 this.displayModal(this);
             };
-
-            const href = Slot.ASSETS_ROOT + imageFilename;
-            img.setAttributeNS(XLINK_NSPS, "href", href);
-
             const isa = img.setAttribute.bind(img);
             isa(     "x", "-50");
             isa(     "y", "-50");
             isa("height", "100");
             isa( "width", "100");
             isa("preserveAspectRatio", "xMidYMid slice");
-            this.baseElem.appendChild(img);
             // It should go after since SVG1 uses xml-tree order to determine
             // paint-order, and we want it to go _on top_ of the slot rectangle.
         }
