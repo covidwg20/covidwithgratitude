@@ -36,18 +36,25 @@
 
     <!-- VIEW SUBMISSION MODAL -->
         <div id="submission-modal" class="fill-parent center-contents">
-        <div id="submission-modal-inside"></div>
-            <button id="submission-modal-prev"></button>
-            <button id="submission-modal-next"></button>
-            <img id="submission-modal-image"></img>
-            <div id="submission-modal-message"></div>
+        <div id="submission-view">
+            <button id="submission-view-prev" aria-label="previous">prev</button>
+            <!-- VIEW SUBMISSION CONTENT -->
+            <div id="submission-view-content">
+                <img id="submission-view-image"></img>
+                <div id="submission-view-message"></div>
+            </div>
+            <button id="submission-view-next" aria-label="next">next</button>
+        </div>
         </div>
     <!-- MAIN CONTENT -->
         <div class="cwg-screen" id="screen-main">
             <div id="sticky-detector"></div>
             <div id="main-motto" class="text-select-disabled">"staying in, staying thankful"</div>
             <div id="main-blurb" class="text-select-disabled">"[Our blurb]"</div>
-            <div id="main-scroll"></div>
+            <div style="overflow:hidden;">
+                <!-- note: wrapper to contain blurred edges. -->
+                <div id="main-scroll"></div>
+            </div>
         </div>
     <!-- CONTRIBUTE SCREEN -->
         <div class="cwg-screen" id="screen-contribute">

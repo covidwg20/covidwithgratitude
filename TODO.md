@@ -3,6 +3,8 @@
 
 ## High Priority
 
+- Submission viewer's previous and next buttons navigation.
+
 ## Maintenance
 
 - Remove temporary fix for duplicated SVG submission boxes

@@ -75,7 +75,8 @@ function SWITCH_SCREEN(targetId: SCREEN_ID): void {
 	const target = screenDescs[targetId];
 	if (target !== oldCur) {
 		target.bodyElem.style.display = ""; // Hand back control to CSS.
-		target.buttonElem.dataset["screenCurrent"] = ""; // exists.
+        target.buttonElem.dataset["screenCurrent"] = ""; // exists.
+        mainScroll?.modal.hideModal();
 		if (oldCur) {
 			// ^Check for edge-case (__CURRENT_SCREEN start off as undefined).
 			oldCur.bodyElem.style.display = "none";
@@ -98,7 +99,7 @@ class MainScroll {
     public  readonly artHostElem: HTMLElement;
     private readonly svgTemplate: Promise<SVGSVGElement>;
 	private readonly slots: MainScroll.Slot[];
-	private readonly modal: MainScroll.Modal;
+	public  readonly modal: MainScroll.Modal;
 
     public constructor() {
         this.artHostElem = document.getElementById("main-scroll")!;
@@ -115,10 +116,7 @@ class MainScroll {
 			// We can probably fetch a json file describing what submissions exist...?
 			mainScroll.fillSlot(0,"thepassionofchrist.png");
 		});
-		this.modal = new MainScroll.Modal(
-            document.getElementById("submission-modal")!,
-            this.artHostElem,
-        );
+		this.modal = new MainScroll.Modal();
     }
 
     /**
@@ -235,6 +233,9 @@ namespace MainScroll {
         public get isEmpty(): boolean {
             return this.__image === undefined;
         }
+        public get imageSource(): string | undefined {
+            return this.__image?.href.baseVal;
+        }
     }
     export namespace Slot {
         export type Id = number;
@@ -250,39 +251,45 @@ namespace MainScroll {
         baseElem:       HTMLElement;
         imageElem:      HTMLImageElement;
         messageElem:    HTMLElement;
-        artworkElem:    HTMLElement;
-		public constructor(baseElem: HTMLElement, artworkElem: HTMLElement) {
-            this.baseElem = baseElem;
-            this.artworkElem = artworkElem;
-
-            baseElem.tabIndex = 0;
-			baseElem.addEventListener("keydown", (ev) => {
+        blurElem:       HTMLElement;
+		public constructor() {
+            const base
+                = this.baseElem
+                = document.getElementById("submission-modal")!;
+            this.blurElem = document.getElementById("main-scroll")!;
+            base.tabIndex = 0;
+			base.addEventListener("keydown", (ev) => {
 				if (ev.key === "Escape") {
 					this.hideModal();
 				}
 			});
-			baseElem.addEventListener("click", (ev) => {
-				if (ev.target === baseElem) {
+			base.addEventListener("click", (ev) => {
+				if (ev.target === base) {
 					this.hideModal();
 				}
-			});
+            });
+            this.imageElem = (document.getElementById("submission-view-image") as HTMLImageElement);
+            this.messageElem = document.getElementById("submission-view-message")!;
 		}
         public showModal(slot: Slot): void {
             // TODO.impl Put this submission's contents in the modal.
-            this.imageElem
+            this.imageElem.src = slot.imageSource!;
+            this.messageElem.innerText = "thank you!";
 
             // Make sure the padding-box excludes the nav bar:
             this.baseElem.style.borderTopWidth =
                 document.getElementsByTagName("nav")[0]
                 .getBoundingClientRect().height + "px";
 
-            this.artworkElem.dataset["blur"] = "";
-            this.baseElem.style.visibility = "visible";
+            document.body.style.overflow = "hidden";
+            this.blurElem.dataset["showModal"] = "";
+            this.baseElem.dataset["showModal"] = "";
             this.baseElem.focus();
         }
         public hideModal(): void {
-            this.baseElem.style.visibility = "hidden";
-            delete this.artworkElem.dataset["blur"];
+            document.body.style.overflow = "";
+            delete this.blurElem.dataset["showModal"];
+            delete this.baseElem.dataset["showModal"];
         }
 	}
 	Object.freeze(Modal);

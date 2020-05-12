@@ -19,12 +19,13 @@ body {
     content to push it there via overflow: */
     display:        grid;
     grid-template:
-        "nav" max-content
-        "main" auto
-        "footer" max-content
+        "nav"       max-content
+        "main"      auto
+        "footer"    max-content
         / 1fr;
     align-content:  space-between;
     min-height:     100vh;
+    box-sizing:     border-box;
 }
 body > * {
     grid-area: main;

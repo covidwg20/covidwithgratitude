@@ -22,6 +22,7 @@
 
 nav {
     z-index:        1000;
+    contain:        content;
     position:       sticky;
     top:            0px;
     overflow:       hidden;
@@ -56,6 +57,7 @@ nav > .nav-side > * {
 @media screen and (max-aspect-ratio: 2/3) {
     nav {
         padding:    0rem  0rem;
+        justify-content: space-evenly;
         font-size:  0.75rem;
     }
     nav > .nav-side > * {
@@ -77,14 +79,16 @@ nav > .nav-side > * {
 
 
 footer {
-    background-color: var(--colour-tone0);
+    contain:        content;
     padding:        0.6rem;
     overflow:       hidden;
     display:        grid;
     grid-template-columns: repeat(3, 1fr);
+    background-color: var(--colour-tone0);
 }
 #social-media-links {
     --dimensions:       2.5rem;
+    align-self:         center;
     display:            inline-grid;
     /* grid-auto-columns:  3rem;
     grid-template-rows: 3rem; */
