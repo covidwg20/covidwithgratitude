@@ -122,9 +122,10 @@ class MainScroll {
     private readonly svgTemplate: Promise<SVGSVGElement>;
     private readonly slots: MainScroll.Slot[];
 
-    modalElem:          HTMLElement;
-    modalImageElem:     HTMLImageElement;
-    modalMessageElem:   HTMLElement;
+    private readonly modalElem:          HTMLElement;
+    private          modalCurrentSlot:   MainScroll.Slot;
+    private readonly modalImageElem:     HTMLImageElement;
+    private readonly modalMessageElem:   HTMLElement;
 
     public constructor() {
         this.artHostElem = document.getElementById("main-scroll")!;
@@ -137,8 +138,7 @@ class MainScroll {
         });
         this.slots = [];
 
-        ;
-        makeRequest(MainScroll.Slot.SUBMISSIONS_ROOT + "existing.json")
+        makeRequest(GITHUB_FILES.urlGetRaw + MainScroll.Slot.SUBMISSIONS_ROOT + "existing.json")
         .then((xhr) => JSON.parse(xhr.response))
         .then((submissions) => {
             Object.keys(submissions).forEach((id) => {
@@ -151,9 +151,32 @@ class MainScroll {
             = this.modalElem
             = document.getElementById("submission-modal")!;
         modal.tabIndex = 0;
+        const modalNavPrev = () => {
+            for (let i = this.modalCurrentSlot.id - 1; i >= 0; i--) {
+                const slot = this.slots[i];
+                if (!slot.isEmpty) {
+                    this.setModalSubmission(slot);
+                    break;
+                }
+            }
+        }
+        const modalNavNext = () => {
+            const numSlots = this.slots.length;
+            for (let i = this.modalCurrentSlot.id + 1; i < numSlots; i++) {
+                const slot = this.slots[i];
+                if (!slot.isEmpty) {
+                    this.setModalSubmission(slot);
+                    break;
+                }
+            }
+        }
         modal.addEventListener("keydown", (ev) => {
             if (ev.key === "Escape") {
                 this.hideModal();
+            } else if (ev.key === "ArrowLeft") {
+                modalNavPrev();
+            } else if (ev.key === "ArrowRight") {
+                modalNavNext();
             }
         });
         modal.addEventListener("click", (ev) => {
@@ -161,6 +184,8 @@ class MainScroll {
                 this.hideModal();
             }
         });
+        document.getElementById("submission-view-prev")!.onclick = modalNavPrev;
+        document.getElementById("submission-view-next")!.onclick = modalNavNext;
         this.modalImageElem = (document.getElementById("submission-view-image") as HTMLImageElement);
         this.modalMessageElem = document.getElementById("submission-view-message")!;
     }
@@ -221,7 +246,7 @@ class MainScroll {
     }
 
     public setModalSubmission(slot: MainScroll.Slot): void {
-        // TODO.impl Hook this up with the prev/next buttons in the submission modal.
+        this.modalCurrentSlot = slot;
         this.modalImageElem.src = slot.imageSource!;
         this.modalMessageElem.innerText = slot.messageString!;
     }
@@ -287,8 +312,8 @@ namespace MainScroll {
          * Do not use this directly. Use the wrapper defined in `MainScroll`.
          */
         public __fill(imageFileName: string): void {
-            makeRequest(/* GITHUB_FILES.urlGetRaw
-                +  */Slot.SUBMISSIONS_ROOT + this.id + "/message.txt").then((xhr) => {
+            makeRequest(GITHUB_FILES.urlGetRaw
+                + Slot.SUBMISSIONS_ROOT + this.id + "/message.txt").then((xhr) => {
                 this.__messageString = xhr.responseText;
             })
             const img = this.__image = document.createElementNS(SVG_NSPS, "image");
@@ -297,7 +322,10 @@ namespace MainScroll {
             img.onclick = (ev) => {
                 this.displayModal(this);
             };
-            img.setAttributeNS(XLINK_NSPS, "href", imageFileName);
+            const imageSrc = GITHUB_FILES.urlGetRaw
+                + MainScroll.Slot.SUBMISSIONS_ROOT
+                + this.id + "/" + imageFileName;
+            img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
             const isa = img.setAttribute.bind(img);
             isa(     "x", "-50");
             isa(     "y", "-50");
