@@ -37,8 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var SVG_NSPS = "http://www.w3.org/2000/svg";
 var XLINK_NSPS = "http://www.w3.org/1999/xlink";
-var GITHUB_RAW = (window.origin != "null") ? ""
-    : "https://raw.githubusercontent.com/david-fong/CovidWithGratitude/dev/";
+var IMAGE_REGEXP = /.((png)|(jpg)|(jpeg))$/i;
 function makeRequest(url, method) {
     if (method === void 0) { method = "GET"; }
     return __awaiter(this, void 0, void 0, function () {
@@ -63,6 +62,39 @@ function makeRequest(url, method) {
     });
 }
 ;
+var GitHubFiles = (function () {
+    function GitHubFiles(desc) {
+        this.urlGetRaw = "https://raw.githubusercontent.com/" + desc.repoOwner + "/" + desc.repoName + "/" + desc.branch + "/";
+        this.urlGetContents = "https://api.github.com/repos/" + desc.repoOwner + "/" + desc.repoName + "/contents/?ref=" + desc.branch;
+    }
+    GitHubFiles.prototype.getDirContents = function (path) {
+        return __awaiter(this, void 0, void 0, function () {
+            var url, _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        url = new window.URL(this.urlGetContents);
+                        url.pathname += path;
+                        _b = (_a = JSON).parse;
+                        return [4, makeRequest(url.href)];
+                    case 1: return [2, _b.apply(_a, [(_c.sent()).response])];
+                }
+            });
+        });
+    };
+    return GitHubFiles;
+}());
+var GITHUB_FILES = new GitHubFiles({ repoOwner: "david-fong", repoName: "CovidWithGratitude", branch: "dev" });
+Array.from(document.getElementById("social-media-links").getElementsByTagName("a"))
+    .forEach(function (socialLink) {
+    socialLink.onpointerenter = function () { return socialLink.focus(); };
+    socialLink.onpointerleave = function () { return socialLink.blur(); };
+});
+Array.from(document.getElementById("submission-view").getElementsByTagName("button"))
+    .forEach(function (btn) {
+    btn.onpointerenter = function () { return btn.focus(); };
+    btn.onpointerleave = function () { return btn.blur(); };
+});
 var __CURRENT_SCREEN = undefined;
 var SCREEN_ID = Object.freeze({
     MAIN: "screen-main",
@@ -101,7 +133,7 @@ function SWITCH_SCREEN(targetId) {
     if (target !== oldCur) {
         target.bodyElem.style.display = "";
         target.buttonElem.dataset["screenCurrent"] = "";
-        target.bodyElem.focus();
+        mainScroll === null || mainScroll === void 0 ? void 0 : mainScroll.hideModal();
         if (oldCur) {
             oldCur.bodyElem.style.display = "none";
             delete oldCur.buttonElem.dataset["screenCurrent"];
@@ -110,19 +142,9 @@ function SWITCH_SCREEN(targetId) {
     }
 }
 SWITCH_SCREEN(SCREEN_ID.MAIN);
-var SUBMISSION_MODAL = document.getElementById("submission-modal");
-SUBMISSION_MODAL.addEventListener("keydown", function (ev) {
-    if (ev.key === "Escape") {
-        SUBMISSION_MODAL.style.visibility = "hidden";
-    }
-});
-SUBMISSION_MODAL.addEventListener("click", function (ev) {
-    if (ev.target === SUBMISSION_MODAL) {
-        SUBMISSION_MODAL.style.visibility = "hidden";
-    }
-});
 var MainScroll = (function () {
     function MainScroll() {
+        var _this = this;
         this.artHostElem = document.getElementById("main-scroll");
         this.svgTemplate = makeRequest(MainScroll.ARTWORK_SVG_URL).then(function (xhr) {
             return xhr.responseXML.documentElement;
@@ -132,14 +154,61 @@ var MainScroll = (function () {
             xml.setAttribute("dominant-baseline", "middle");
         });
         this.slots = [];
-        this.extendArtwork().then(function () {
-            mainScroll.fillSlot(0, "thepassionofchrist.png");
+        makeRequest(GITHUB_FILES.urlGetRaw + MainScroll.Slot.SUBMISSIONS_ROOT + "existing.json")
+            .then(function (xhr) { return JSON.parse(xhr.response); })
+            .then(function (submissions) {
+            Object.keys(submissions).forEach(function (id) {
+                _this.fillSlot(Number(id), submissions[id]);
+            });
         });
+        var modal = this.modalElem
+            = document.getElementById("submission-modal");
+        modal.tabIndex = 0;
+        var modalNavPrev = function () {
+            for (var i = _this.modalCurrentSlot.id - 1; i >= 0; i--) {
+                var slot = _this.slots[i];
+                if (!slot.isEmpty) {
+                    _this.setModalSubmission(slot);
+                    break;
+                }
+            }
+        };
+        var modalNavNext = function () {
+            var numSlots = _this.slots.length;
+            for (var i = _this.modalCurrentSlot.id + 1; i < numSlots; i++) {
+                var slot = _this.slots[i];
+                if (!slot.isEmpty) {
+                    _this.setModalSubmission(slot);
+                    break;
+                }
+            }
+        };
+        modal.addEventListener("keydown", function (ev) {
+            if (ev.key === "Escape") {
+                _this.hideModal();
+            }
+            else if (ev.key === "ArrowLeft") {
+                modalNavPrev();
+            }
+            else if (ev.key === "ArrowRight") {
+                modalNavNext();
+            }
+        });
+        modal.addEventListener("click", function (ev) {
+            if (ev.target === modal) {
+                _this.hideModal();
+            }
+        });
+        document.getElementById("submission-view-prev").onclick = modalNavPrev;
+        document.getElementById("submission-view-next").onclick = modalNavNext;
+        this.modalImageElem = document.getElementById("submission-view-image");
+        this.modalMessageElem = document.getElementById("submission-view-message");
     }
     MainScroll.prototype.extendArtwork = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var newSvgCopy, boxesLayer, __allSlots, prevNumSlots, newSlots;
+            var newSvgCopy, boxesLayer, __allSlots, prevNumSlots, displayModal, newSlots;
             var _a;
+            var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0: return [4, this.svgTemplate];
@@ -148,10 +217,14 @@ var MainScroll = (function () {
                         boxesLayer = newSvgCopy.getElementById("submission_boxes");
                         __allSlots = Array.from(boxesLayer.children);
                         prevNumSlots = this.slots.length;
+                        displayModal = function (slotSelf) {
+                            _this.setModalSubmission(slotSelf);
+                            _this.showModal();
+                        };
                         newSlots = __allSlots.splice(__allSlots.length / 2)
                             .map(function (rect) { return Object.freeze({ rect: rect, x: rect.x.baseVal.value, y: rect.y.baseVal.value, }); })
                             .sort(function (a, b) { return a.x - b.x; }).sort(function (a, b) { return a.y - b.y; })
-                            .map(function (desc, index) { return new MainScroll.Slot(prevNumSlots + index, desc.rect); });
+                            .map(function (desc, index) { return new MainScroll.Slot(prevNumSlots + index, displayModal, desc.rect); });
                         (_a = this.slots).push.apply(_a, newSlots);
                         this.artHostElem.appendChild(newSvgCopy);
                         return [2];
@@ -159,19 +232,47 @@ var MainScroll = (function () {
             });
         });
     };
-    MainScroll.prototype.fillSlot = function (slotId, imageFilename) {
-        var slot = this.slots[slotId];
-        if (!slot.isEmpty)
-            throw new Error("slot `" + slotId + "` is already occupied");
-        slot.__fill(imageFilename);
+    MainScroll.prototype.fillSlot = function (slotId, imageFileName) {
+        var _this = this;
+        if (slotId < this.slots.length) {
+            var slot = this.slots[slotId];
+            if (!slot.isEmpty)
+                throw new Error("slot `" + slotId + "` is already occupied");
+            slot.__fill(imageFileName);
+        }
+        else {
+            this.extendArtwork().then(function () {
+                _this.fillSlot(slotId, imageFileName);
+            });
+        }
+    };
+    MainScroll.prototype.setModalSubmission = function (slot) {
+        this.modalCurrentSlot = slot;
+        this.modalImageElem.src = slot.imageSource;
+        this.modalMessageElem.innerText = slot.messageString;
+    };
+    MainScroll.prototype.showModal = function () {
+        this.modalElem.style.borderTopWidth =
+            document.getElementsByTagName("nav")[0]
+                .getBoundingClientRect().height + "px";
+        document.body.style.overflow = "hidden";
+        this.artHostElem.dataset["showModal"] = "";
+        this.modalElem.dataset["showModal"] = "";
+        this.modalElem.focus();
+    };
+    MainScroll.prototype.hideModal = function () {
+        document.body.style.overflow = "";
+        delete this.artHostElem.dataset["showModal"];
+        delete this.modalElem.dataset["showModal"];
     };
     return MainScroll;
 }());
 (function (MainScroll) {
-    MainScroll.ARTWORK_SVG_URL = GITHUB_RAW + "assets/images/houses.svg";
+    MainScroll.ARTWORK_SVG_URL = GITHUB_FILES.urlGetRaw + "assets/images/houses.svg";
     var Slot = (function () {
-        function Slot(id, rect) {
-            this.shapeRect = rect;
+        function Slot(id, displayModal, rect) {
+            this.id = id;
+            this.displayModal = displayModal;
             var base = this.baseElem = document.createElementNS(SVG_NSPS, "svg");
             base.classList.add("submission", "text-select-disabled");
             var bsa = base.setAttribute.bind(base);
@@ -187,20 +288,22 @@ var MainScroll = (function () {
             base.appendChild(idText);
             rect.insertAdjacentElement("afterend", base);
         }
-        Slot.prototype.__fill = function (imageFilename) {
+        Slot.prototype.__fill = function (imageFileName) {
             var _this = this;
+            makeRequest(GITHUB_FILES.urlGetRaw
+                + Slot.SUBMISSIONS_ROOT + this.id + "/message.txt").then(function (xhr) {
+                _this.__messageString = xhr.responseText;
+            });
             var img = this.__image = document.createElementNS(SVG_NSPS, "image");
             img.classList.add("submission__image");
             img.tabIndex = 0;
             img.onclick = function (ev) {
-                if (_this.isEmpty) {
-                }
-                else {
-                    _this.displayFull();
-                }
+                _this.displayModal(_this);
             };
-            var href = Slot.ASSETS_ROOT + imageFilename;
-            img.setAttributeNS(XLINK_NSPS, "href", href);
+            var imageSrc = GITHUB_FILES.urlGetRaw
+                + MainScroll.Slot.SUBMISSIONS_ROOT
+                + this.id + "/" + imageFileName;
+            img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
             var isa = img.setAttribute.bind(img);
             isa("x", "-50");
             isa("y", "-50");
@@ -216,14 +319,26 @@ var MainScroll = (function () {
             enumerable: true,
             configurable: true
         });
-        Slot.prototype.displayFull = function () {
-            SUBMISSION_MODAL.style.visibility = "visible";
-        };
+        Object.defineProperty(Slot.prototype, "imageSource", {
+            get: function () {
+                var _a;
+                return (_a = this.__image) === null || _a === void 0 ? void 0 : _a.href.baseVal;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Slot.prototype, "messageString", {
+            get: function () {
+                return this.__messageString;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return Slot;
     }());
     MainScroll.Slot = Slot;
     (function (Slot) {
-        Slot.ASSETS_ROOT = "assets/images/submissions/";
+        Slot.SUBMISSIONS_ROOT = "assets/submissions/";
     })(Slot = MainScroll.Slot || (MainScroll.Slot = {}));
     Object.freeze(Slot);
     Object.freeze(Slot.prototype);

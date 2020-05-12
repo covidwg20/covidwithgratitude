@@ -33,15 +33,29 @@
                 <!-- TODO logo goes here -->
             </span>
         </nav>
+
+    <!-- VIEW SUBMISSION MODAL -->
+        <div id="submission-modal" class="fill-parent center-contents">
+        <div id="submission-view">
+            <button id="submission-view-prev" aria-label="previous"></button>
+            <button id="submission-view-next" aria-label="next"></button>
+            <!-- VIEW SUBMISSION CONTENT -->
+            <div id="submission-view-content">
+                <img id="submission-view-image"></img>
+                <div id="submission-view-message"></div>
+            </div>
+        </div>
+        </div>
     <!-- MAIN CONTENT -->
         <div class="cwg-screen" id="screen-main">
             <div id="sticky-detector"></div>
             <div id="main-motto" class="text-select-disabled">"staying in, staying thankful"</div>
             <div id="main-blurb" class="text-select-disabled">"[Our blurb]"</div>
-            <div id="main-scroll"></div>
+            <div style="overflow:hidden;">
+                <!-- note: wrapper to contain blurred edges. -->
+                <div id="main-scroll"></div>
+            </div>
         </div>
-    <!-- VIEW SUBMISSION MODAL -->
-        <div id="submission-modal"></div>
     <!-- CONTRIBUTE SCREEN -->
         <div class="cwg-screen" id="screen-contribute">
             Contribute - Lorem Ipsum

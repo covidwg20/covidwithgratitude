@@ -1,5 +1,13 @@
 
-/* TODO do we still need the padding design team
+/* Whichever element gets blurred: */
+#main-scroll {
+    transition: filter 0.5s ease-in-out;
+}
+#main-scroll[data-show-modal] {
+    filter: blur(5px);
+}
+
+/* TODO do we still need the padding once design team
 makes the artwork background? */
 #main-scroll {
     contain:            content;
@@ -13,10 +21,6 @@ makes the artwork background? */
     background-color: var(--colour-blue);
 }
 
-#main-scroll:focus-within {
-    filter: blur(5px);
-}
-
 .submission {
     pointer-events: none;
     cursor:         pointer;
@@ -27,7 +31,6 @@ makes the artwork background? */
 .submission__image:focus {
     outline:        none;
 }
-
 .submission__id-text {
     fill:           white;
     opacity:        0.7;
@@ -38,7 +41,90 @@ makes the artwork background? */
     transition: transform 0.25s ease-out;
 }
 
+
 #submission-modal {
-    visibility:     hidden;
-    position:       absolute;
+    z-index:        500;
+    contain:        strict;
+    position:       fixed;
+    overflow:       auto;
+    border:         0px solid transparent;
+    padding:        1.7rem;
+    pointer-events: none;
+    opacity:        0.0;
+    transition: opacity 0.5s ease-in-out;
+}
+#submission-modal[data-show-modal] {
+    pointer-events: initial;
+    opacity:        1.0;
+}
+#submission-modal:not([data-show-modal]) * {
+    pointer-events: none;
+}
+#submission-view {
+    pointer-events: none;
+    max-height:     100%;
+    max-width:      100%;
+    display:        grid;
+    grid-template:
+        "prev content next" max-content
+        / auto 1fr auto;
+    justify-content:center;
+    justify-items:  center;
+    align-items:    center;
+}
+#submission-view > * { pointer-events: all; }
+#submission-view-prev { grid-area: prev; clip-path: polygon(100% 0%, 100% 100%, 0%  50%); }
+#submission-view-next { grid-area: next; clip-path: polygon(  0% 0%, 100%  50%, 0% 100%); }
+#submission-view > button {
+    cursor:         pointer;
+    z-index:        1;
+    border:         none;
+    height:         1.6rem;
+    width:          1.4rem;
+    color:          inherit;
+    background-color: var(--colour-white);
+    opacity:        0.9;
+
+    transition-property: transform, opacity;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out;
+}
+#submission-view > button:focus {
+    outline:        none;
+    transform:      scale(1.2);
+    opacity:        1.0;
+}
+#submission-view-content {
+    grid-area:      content;
+    margin:         1.8rem;
+    display:        grid;
+    grid-gap:       0.7rem;
+    box-shadow: 0px 0px  3.5rem 0.001rem  var(--colour-mainFg);
+    background-color: var(--colour-mainFg-behind-shadow);
+}
+#submission-view-image {
+    border: 0.5rem solid var(--colour-white);
+    box-sizing:     border-box;
+    max-width:      100%;
+    object-fit:     contain;
+}
+#submission-view-message {
+    padding:        0.7rem;
+    background-color: var(--colour-white);
+}
+
+/* Responsive Submission-View Layout Rules */
+@media screen and (max-aspect-ratio: 2/3) {
+    #submission-modal {
+        padding:    1.0rem;
+    }
+    #submission-view {
+        grid-template:
+            "content content" 1fr
+            "   prev next   " auto
+            /    1fr 1fr      ;
+    }
+    #submission-view-content {
+        margin:     0.6rem;
+    }
 }
