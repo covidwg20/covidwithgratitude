@@ -142,21 +142,28 @@ var MainScroll = (function () {
         this.slots = [];
         makeRequest(GITHUB_FILES.urlAssetsGetRaw + "existing.json")
             .then(function (xhr) { return JSON.parse(xhr.response); })
-            .then(function (submissions) {
-            Object.keys(submissions)
-                .map(function (num) { return Number(num); })
-                .sort(function (a, b) { return a - b; })
-                .forEach(function (id) { return __awaiter(_this, void 0, void 0, function () {
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4, this.fillSlot(id, submissions[id])];
-                        case 1:
-                            _a.sent();
-                            return [2];
-                    }
-                });
-            }); });
-        });
+            .then(function (submissions) { return __awaiter(_this, void 0, void 0, function () {
+            var ids, _i, ids_1, id;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        ids = Object.keys(submissions).map(function (num) { return Number(num); }).sort(function (a, b) { return a - b; });
+                        _i = 0, ids_1 = ids;
+                        _a.label = 1;
+                    case 1:
+                        if (!(_i < ids_1.length)) return [3, 4];
+                        id = ids_1[_i];
+                        return [4, this.fillSlot(id, submissions[id])];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3:
+                        _i++;
+                        return [3, 1];
+                    case 4: return [2];
+                }
+            });
+        }); });
         var modal = this.modalElem
             = document.getElementById("submission-modal");
         modal.tabIndex = 0;
@@ -239,13 +246,15 @@ var MainScroll = (function () {
                         if (!slot.isEmpty)
                             throw new Error("slot `" + slotId + "` is already occupied");
                         slot.__fill(imageFileName);
-                        return [3, 3];
+                        return [3, 4];
                     case 1: return [4, this.extendArtwork()];
                     case 2:
                         _a.sent();
-                        this.fillSlot(slotId, imageFileName);
-                        _a.label = 3;
-                    case 3: return [2];
+                        return [4, this.fillSlot(slotId, imageFileName)];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4: return [2];
                 }
             });
         });

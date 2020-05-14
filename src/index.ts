@@ -129,16 +129,14 @@ class MainScroll {
 
         makeRequest(GITHUB_FILES.urlAssetsGetRaw + "existing.json")
         .then((xhr) => JSON.parse(xhr.response))
-        .then((submissions) => {
-            Object.keys(submissions)
-            .map((num) => Number(num))
-            .sort((a,b) => a - b)
-            .forEach(async (id) => {
+        .then(async (submissions) => {
+            const ids = Object.keys(submissions).map((num) => Number(num)).sort((a,b) => a - b);
+            for (const id of ids) {
                 // Wait for each submission. It may take a while if it needs
                 // to extend the artwork, and we don't want to accidentally
                 // think we need to extend when we actually don't.
                 await this.fillSlot(id, submissions[id]);
-            });
+            }
         });
 
         // Initialize modal:
@@ -235,7 +233,7 @@ class MainScroll {
             await this.extendArtwork();
             // Recurse, extending the artwork once each time until
             // the slot to be filled exists:
-            this.fillSlot(slotId, imageFileName);
+            await this.fillSlot(slotId, imageFileName);
         }
     }
 
