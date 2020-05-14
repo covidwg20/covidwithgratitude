@@ -18,23 +18,15 @@ async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttp
     });
 };
 class GitHubFiles {
-    public  readonly urlGetRaw: string;
-    private readonly urlGetContents: string;
+    public readonly urlAssetsGetRaw: string;
     public constructor(desc: { repoOwner: string; repoName: string; branch: string; }) {
-        this.urlGetRaw = `https://raw.githubusercontent.com/${desc.repoOwner}/${desc.repoName}/${desc.branch}/`;
-        this.urlGetContents = `https://api.github.com/repos/${desc.repoOwner}/${desc.repoName}/contents/?ref=${desc.branch}`;
-    }
-    public async getDirContents(path: string): Promise<{
-        name: string,
-        path: string,
-    }[]> {
-        const url = new window.URL(this.urlGetContents);
-        url.pathname += path;
-        return JSON.parse((await makeRequest(url.href)).response);
+        this.urlAssetsGetRaw = `https://raw.githubusercontent.com/`
+            + `${desc.repoOwner}/${desc.repoName}/${desc.branch}/`
+            + `assets/submissions/`;
     }
 }
 const GITHUB_FILES = new GitHubFiles(
-    { repoOwner: "david-fong", repoName: "CovidWithGratitude", branch: "dev" },
+    { repoOwner: "david-fong", repoName: "CovidWithGratitude", branch: "assets", },
 );
 
 
@@ -114,9 +106,6 @@ SWITCH_SCREEN(SCREEN_ID.MAIN);
 /**
  *
  */
-// TODO.learn is memory a concern with the template? We could just request
-// it over XHR every time we want to make a copy... Is the browser caching
-// it already/anyway?
 class MainScroll {
     public  readonly artHostElem: HTMLElement;
     private readonly svgTemplate: Promise<SVGSVGElement>;
@@ -129,7 +118,7 @@ class MainScroll {
 
     public constructor() {
         this.artHostElem = document.getElementById("main-scroll")!;
-        this.svgTemplate = makeRequest(MainScroll.ARTWORK_SVG_URL).then((xhr) => {
+        this.svgTemplate = makeRequest(GITHUB_FILES.urlAssetsGetRaw + "artwork.svg").then((xhr) => {
             return xhr.responseXML!.documentElement!;
         }) as Promise<SVGSVGElement>;
         this.svgTemplate.then((xml) => {
@@ -138,11 +127,17 @@ class MainScroll {
         });
         this.slots = [];
 
-        makeRequest(GITHUB_FILES.urlGetRaw + MainScroll.Slot.SUBMISSIONS_ROOT + "existing.json")
+        makeRequest(GITHUB_FILES.urlAssetsGetRaw + "existing.json")
         .then((xhr) => JSON.parse(xhr.response))
         .then((submissions) => {
-            Object.keys(submissions).forEach((id) => {
-                this.fillSlot(Number(id), submissions[id]);
+            Object.keys(submissions)
+            .map((num) => Number(num))
+            .sort((a,b) => a - b)
+            .forEach(async (id) => {
+                // Wait for each submission. It may take a while if it needs
+                // to extend the artwork, and we don't want to accidentally
+                // think we need to extend when we actually don't.
+                await this.fillSlot(id, submissions[id]);
             });
         });
 
@@ -231,17 +226,16 @@ class MainScroll {
     /**
      * Throws an error if the slot is not empty.
      */
-    public fillSlot(slotId: MainScroll.Slot.Id, imageFileName: string): void {
+    public async fillSlot(slotId: MainScroll.Slot.Id, imageFileName: string): Promise<void> {
         if (slotId < this.slots.length) {
             const slot = this.slots[slotId];
             if (!slot.isEmpty) throw new Error(`slot \`${slotId}\` is already occupied`);
             slot.__fill(imageFileName);
         } else {
-            this.extendArtwork().then(() => {
-                // Recurse, extending the artwork once each time until
-                // the slot to be filled exists:
-                this.fillSlot(slotId, imageFileName);
-            });
+            await this.extendArtwork();
+            // Recurse, extending the artwork once each time until
+            // the slot to be filled exists:
+            this.fillSlot(slotId, imageFileName);
         }
     }
 
@@ -268,9 +262,6 @@ class MainScroll {
     }
 }
 namespace MainScroll {
-    // Set to fetch from GitHub repo because browsers don't like
-    // XHR without HTTPS (because it may not be safe from attackers).
-    export const ARTWORK_SVG_URL = GITHUB_FILES.urlGetRaw + "assets/images/houses.svg";
     /**
      *
      */
@@ -312,8 +303,8 @@ namespace MainScroll {
          * Do not use this directly. Use the wrapper defined in `MainScroll`.
          */
         public __fill(imageFileName: string): void {
-            makeRequest(GITHUB_FILES.urlGetRaw
-                + Slot.SUBMISSIONS_ROOT + this.id + "/message.txt").then((xhr) => {
+            makeRequest(GITHUB_FILES.urlAssetsGetRaw
+                + this.id + "/message.txt").then((xhr) => {
                 this.__messageString = xhr.responseText;
             })
             const img = this.__image = document.createElementNS(SVG_NSPS, "image");
@@ -322,8 +313,7 @@ namespace MainScroll {
             img.onclick = (ev) => {
                 this.displayModal(this);
             };
-            const imageSrc = GITHUB_FILES.urlGetRaw
-                + MainScroll.Slot.SUBMISSIONS_ROOT
+            const imageSrc = GITHUB_FILES.urlAssetsGetRaw
                 + this.id + "/" + imageFileName;
             img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
             const isa = img.setAttribute.bind(img);
@@ -346,7 +336,6 @@ namespace MainScroll {
     }
     export namespace Slot {
         export type Id = number;
-        export const SUBMISSIONS_ROOT = "assets/submissions/";
     }
     Object.freeze(Slot);
 	Object.freeze(Slot.prototype);

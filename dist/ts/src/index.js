@@ -64,27 +64,13 @@ function makeRequest(url, method) {
 ;
 var GitHubFiles = (function () {
     function GitHubFiles(desc) {
-        this.urlGetRaw = "https://raw.githubusercontent.com/" + desc.repoOwner + "/" + desc.repoName + "/" + desc.branch + "/";
-        this.urlGetContents = "https://api.github.com/repos/" + desc.repoOwner + "/" + desc.repoName + "/contents/?ref=" + desc.branch;
+        this.urlAssetsGetRaw = "https://raw.githubusercontent.com/"
+            + (desc.repoOwner + "/" + desc.repoName + "/" + desc.branch + "/")
+            + "assets/submissions/";
     }
-    GitHubFiles.prototype.getDirContents = function (path) {
-        return __awaiter(this, void 0, void 0, function () {
-            var url, _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        url = new window.URL(this.urlGetContents);
-                        url.pathname += path;
-                        _b = (_a = JSON).parse;
-                        return [4, makeRequest(url.href)];
-                    case 1: return [2, _b.apply(_a, [(_c.sent()).response])];
-                }
-            });
-        });
-    };
     return GitHubFiles;
 }());
-var GITHUB_FILES = new GitHubFiles({ repoOwner: "david-fong", repoName: "CovidWithGratitude", branch: "dev" });
+var GITHUB_FILES = new GitHubFiles({ repoOwner: "david-fong", repoName: "CovidWithGratitude", branch: "assets", });
 Array.from(document.getElementById("social-media-links").getElementsByTagName("a"))
     .forEach(function (socialLink) {
     socialLink.onpointerenter = function () { return socialLink.focus(); };
@@ -146,7 +132,7 @@ var MainScroll = (function () {
     function MainScroll() {
         var _this = this;
         this.artHostElem = document.getElementById("main-scroll");
-        this.svgTemplate = makeRequest(MainScroll.ARTWORK_SVG_URL).then(function (xhr) {
+        this.svgTemplate = makeRequest(GITHUB_FILES.urlAssetsGetRaw + "artwork.svg").then(function (xhr) {
             return xhr.responseXML.documentElement;
         });
         this.svgTemplate.then(function (xml) {
@@ -154,12 +140,22 @@ var MainScroll = (function () {
             xml.setAttribute("dominant-baseline", "middle");
         });
         this.slots = [];
-        makeRequest(GITHUB_FILES.urlGetRaw + MainScroll.Slot.SUBMISSIONS_ROOT + "existing.json")
+        makeRequest(GITHUB_FILES.urlAssetsGetRaw + "existing.json")
             .then(function (xhr) { return JSON.parse(xhr.response); })
             .then(function (submissions) {
-            Object.keys(submissions).forEach(function (id) {
-                _this.fillSlot(Number(id), submissions[id]);
-            });
+            Object.keys(submissions)
+                .map(function (num) { return Number(num); })
+                .sort(function (a, b) { return a - b; })
+                .forEach(function (id) { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4, this.fillSlot(id, submissions[id])];
+                        case 1:
+                            _a.sent();
+                            return [2];
+                    }
+                });
+            }); });
         });
         var modal = this.modalElem
             = document.getElementById("submission-modal");
@@ -233,18 +229,26 @@ var MainScroll = (function () {
         });
     };
     MainScroll.prototype.fillSlot = function (slotId, imageFileName) {
-        var _this = this;
-        if (slotId < this.slots.length) {
-            var slot = this.slots[slotId];
-            if (!slot.isEmpty)
-                throw new Error("slot `" + slotId + "` is already occupied");
-            slot.__fill(imageFileName);
-        }
-        else {
-            this.extendArtwork().then(function () {
-                _this.fillSlot(slotId, imageFileName);
+        return __awaiter(this, void 0, void 0, function () {
+            var slot;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(slotId < this.slots.length)) return [3, 1];
+                        slot = this.slots[slotId];
+                        if (!slot.isEmpty)
+                            throw new Error("slot `" + slotId + "` is already occupied");
+                        slot.__fill(imageFileName);
+                        return [3, 3];
+                    case 1: return [4, this.extendArtwork()];
+                    case 2:
+                        _a.sent();
+                        this.fillSlot(slotId, imageFileName);
+                        _a.label = 3;
+                    case 3: return [2];
+                }
             });
-        }
+        });
     };
     MainScroll.prototype.setModalSubmission = function (slot) {
         this.modalCurrentSlot = slot;
@@ -268,7 +272,6 @@ var MainScroll = (function () {
     return MainScroll;
 }());
 (function (MainScroll) {
-    MainScroll.ARTWORK_SVG_URL = GITHUB_FILES.urlGetRaw + "assets/images/houses.svg";
     var Slot = (function () {
         function Slot(id, displayModal, rect) {
             this.id = id;
@@ -290,8 +293,8 @@ var MainScroll = (function () {
         }
         Slot.prototype.__fill = function (imageFileName) {
             var _this = this;
-            makeRequest(GITHUB_FILES.urlGetRaw
-                + Slot.SUBMISSIONS_ROOT + this.id + "/message.txt").then(function (xhr) {
+            makeRequest(GITHUB_FILES.urlAssetsGetRaw
+                + this.id + "/message.txt").then(function (xhr) {
                 _this.__messageString = xhr.responseText;
             });
             var img = this.__image = document.createElementNS(SVG_NSPS, "image");
@@ -300,8 +303,7 @@ var MainScroll = (function () {
             img.onclick = function (ev) {
                 _this.displayModal(_this);
             };
-            var imageSrc = GITHUB_FILES.urlGetRaw
-                + MainScroll.Slot.SUBMISSIONS_ROOT
+            var imageSrc = GITHUB_FILES.urlAssetsGetRaw
                 + this.id + "/" + imageFileName;
             img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
             var isa = img.setAttribute.bind(img);
@@ -337,9 +339,6 @@ var MainScroll = (function () {
         return Slot;
     }());
     MainScroll.Slot = Slot;
-    (function (Slot) {
-        Slot.SUBMISSIONS_ROOT = "assets/submissions/";
-    })(Slot = MainScroll.Slot || (MainScroll.Slot = {}));
     Object.freeze(Slot);
     Object.freeze(Slot.prototype);
 })(MainScroll || (MainScroll = {}));
