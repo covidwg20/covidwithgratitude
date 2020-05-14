@@ -1,9 +1,10 @@
-
 name: Update Existing Submissions
 on:
   push:
-    branches: [ assets ]
-
+    branches:
+      - assets
+    paths:
+      - assets/submissions/**
 jobs:
   do_it:
     runs-on: ubuntu-latest
