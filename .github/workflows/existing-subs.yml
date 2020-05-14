@@ -14,10 +14,8 @@ jobs:
       with:
         node-version: '12.x'
     - run: |
-        git switch assets
         git config --local user.email "actions@github.com"
         git config --local user.name "GitHub Actions"
-        node 
-        git add ./assets
-        git commit -m "Update json record of existing submission images"
+        node scripts/submissions.js
+        git commit -am "Update json record of existing submission images"
         git push
