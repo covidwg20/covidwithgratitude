@@ -1,0 +1,22 @@
+
+name: Update Existing Submissions
+on:
+  push:
+    branches: [ assets ]
+
+jobs:
+  do_it:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - run: |
+        git switch assets
+        git config --local user.email "actions@github.com"
+        git config --local user.name "GitHub Actions"
+        node 
+        git add ./assets
+        git commit -m "Update json record of existing submission images"
+        git push
