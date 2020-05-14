@@ -44,12 +44,13 @@ makes the artwork background? */
 
 #submission-modal {
     z-index:        500;
+    pointer-events: none;
     contain:        strict;
     position:       fixed;
     overflow:       auto;
     border:         0px solid transparent;
     padding:        1.7rem;
-    pointer-events: none;
+    padding-top:    0.5rem;
     opacity:        0.0;
     transition: opacity 0.5s ease-in-out;
 }
@@ -105,6 +106,7 @@ makes the artwork background? */
 #submission-view-image {
     border: 0.5rem solid var(--colour-white);
     box-sizing:     border-box;
+    max-height:     60vh;
     max-width:      100%;
     object-fit:     contain;
 }
