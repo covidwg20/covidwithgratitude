@@ -1,0 +1,8 @@
+David Fong
+Thank you guys!
+Testing newline.
+
+Testing newline following empty line.
+
+
+Testing newline following two empty lines.
