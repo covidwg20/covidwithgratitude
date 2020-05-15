@@ -70,7 +70,7 @@ var GitHubFiles = (function () {
     }
     return GitHubFiles;
 }());
-var GITHUB_FILES = new GitHubFiles({ repoOwner: "david-fong", repoName: "CovidWithGratitude", branch: "assets", });
+var GITHUB_FILES = new GitHubFiles({ repoOwner: "covidwg20", repoName: "CovidWithGratitude", branch: "assets", });
 Array.from(document.getElementById("social-media-links").getElementsByTagName("a"))
     .forEach(function (socialLink) {
     socialLink.onpointerenter = function () { return socialLink.focus(); };
