@@ -1,7 +1,5 @@
 @import "utils.css";
-@import "colour/index.css";
-@import "fonts.css";
 @import "root.css";
 @import "layout.css";
-@import "mainscroll.css";
-@import "contactinfo.css";
+@import "submissions.css";
+@import "screens.css";

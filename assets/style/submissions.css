@@ -1,15 +1,15 @@
 
 /* Whichever element gets blurred: */
-#main-scroll {
+#main-content {
     transition: filter 0.5s ease-in-out;
 }
-#main-scroll[data-show-modal] {
+#main-content[data-show-modal] {
     filter: blur(5px);
 }
 
 /* TODO do we still need the padding once design team
 makes the artwork background? */
-#main-scroll {
+#main-content {
     contain:            content;
     pointer-events:     none;
     position:           relative;
