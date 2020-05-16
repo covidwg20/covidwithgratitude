@@ -1,0 +1,47 @@
+
+#screen-contribute {
+    counter-reset:  contribute-step;
+}
+#screen-contribute ol {
+    padding-inline-start: unset;
+}
+#screen-contribute li {
+    display:        grid;
+    margin:         0.8em;
+}
+#screen-contribute li::before {
+    counter-increment: contribute-step;
+    content:        counter(contribute-step) ". ";
+    font-size:      1.5em;
+    font-family:    "Abril Fatface", "Georgia", cursive;
+}
+
+
+#contact-info-content-wrapper {
+    margin:         2.0em;
+    display:        grid;
+    grid-template-columns: 14em auto;
+    justify-content: center;
+    gap:            2.5em;
+
+    text-align:     initial;
+}
+#contact-info-content-wrapper img {
+    width:          100%;
+    object-fit:     contain;
+}
+#screen-contact-info address {
+    margin:         0.7em  0em;
+    display:        grid;
+    font-style:     initial;
+}
+@media screen and (max-aspect-ratio: 1/1) {
+    #contact-info-content-wrapper {
+        grid-template-columns: 1fr;
+        grid-template-rows: 14em auto;
+        gap: 0.8em;
+    }
+    #contact-info-content-wrapper img {
+        height:         100%;
+    }
+}

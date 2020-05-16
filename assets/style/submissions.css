@@ -7,18 +7,13 @@
     filter: blur(5px);
 }
 
-/* TODO do we still need the padding once design team
-makes the artwork background? */
 #main-content {
     contain:            content;
     pointer-events:     none;
     position:           relative;
-    padding:            0.5rem;
-    display:            grid;
  /* background-size:    cover;
     background-repeat:  repeat;
     background-origin:  border-box; */
-    background-color: var(--colour-blue);
 }
 
 .submission {

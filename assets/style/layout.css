@@ -106,7 +106,6 @@ footer {
     opacity:            0.5;
 }
 #social-ig { --mask-url: url("https://unpkg.com/simple-icons@v2/icons/instagram.svg"); }
-#social-tw { --mask-url: url("https://unpkg.com/simple-icons@v2/icons/twitter.svg");   }
 #social-fb { --mask-url: url("https://unpkg.com/simple-icons@v2/icons/facebook.svg");  }
 
 #legal-notices {

@@ -10,7 +10,7 @@
     /* ^For the background with box-shadow. I
     really wish CSS had opacity functions. */
     --colour-tone0:     #eae1ca;
-    --colour-blue:      #a1d1ca;
+    --colour-pink:      #eaa38a;
 }
 
 /* If anything goes into fullscreen mode: */
@@ -49,6 +49,11 @@ body > nav {
 }
 body > footer {
     grid-area: footer;
+}
+
+h1, h2 {
+    color:          var(--colour-pink);
+    font-family:    "Abril Fatface", "Georgia", cursive;
 }
 
 /* The CSS doesn't do much. The class is more to
