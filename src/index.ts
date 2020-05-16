@@ -117,7 +117,7 @@ class MainScroll {
     private readonly modalMessageElem:   HTMLElement;
 
     public constructor() {
-        this.artHostElem = document.getElementById("main-scroll")!;
+        this.artHostElem = document.getElementById("main-content")!;
         this.svgTemplate = makeRequest(GITHUB_FILES.urlAssetsGetRaw + "artwork.svg").then((xhr) => {
             return xhr.responseXML!.documentElement!;
         }) as Promise<SVGSVGElement>;
