@@ -1,5 +1,8 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Jost:wght@400&display=swap');
+
 [data-colour-scheme="scheme0"] {
+    --colour-title:     #79a9ad;
     --colour-white:     #ffffff;
     --colour-mainFg:    #737373;
     --colour-mainFg-thin:#73737340;
@@ -7,7 +10,6 @@
     /* ^For the background with box-shadow. I
     really wish CSS had opacity functions. */
     --colour-tone0:     #eae1ca;
-    --colour-tone1:     #d8d9b4;
     --colour-blue:      #a1d1ca;
 }
 
@@ -20,7 +22,7 @@ html {
     scroll-behavior: smooth;
 }
 body {
-    font-family:    "open-sans";
+    font-family:    "Jost", sans-serif;
     color:          var(--colour-mainFg);
     text-align:     center;
 
