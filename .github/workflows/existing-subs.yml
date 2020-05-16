@@ -5,7 +5,6 @@ on:
       - assets
     paths:
       - assets/submissions/**
-      - !assets/submissions/**/*.txt
 jobs:
   do_it:
     runs-on: ubuntu-latest
