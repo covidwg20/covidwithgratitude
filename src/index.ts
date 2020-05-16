@@ -195,7 +195,11 @@ class MainScroll {
     public async extendArtwork(): Promise<void> {
         const newSvgCopy = (await this.svgTemplate).cloneNode(true) as SVGSVGElement;
 
-        const boxesLayer = newSvgCopy.getElementById("submission_boxes") as SVGGElement;
+        const boxesLayer = (
+            newSvgCopy.getElementById("submission_boxes")
+            || Array.from(newSvgCopy.children).find((child) => child.id === "submission_boxes")
+            // ^Safari isn't able to use `getElementById` for some reason...
+        ) as SVGGElement;
         const __allSlots = Array.from(boxesLayer.children) as SVGRectElement[];
         // ^A nascent version of allSlots defined to allow getting `length / 2`.
         const prevNumSlots = this.slots.length;

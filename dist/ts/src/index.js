@@ -217,7 +217,8 @@ var MainScroll = (function () {
                     case 0: return [4, this.svgTemplate];
                     case 1:
                         newSvgCopy = (_b.sent()).cloneNode(true);
-                        boxesLayer = newSvgCopy.getElementById("submission_boxes");
+                        boxesLayer = (newSvgCopy.getElementById("submission_boxes")
+                            || Array.from(newSvgCopy.children).find(function (child) { return child.id === "submission_boxes"; }));
                         __allSlots = Array.from(boxesLayer.children);
                         prevNumSlots = this.slots.length;
                         displayModal = function (slotSelf) {
