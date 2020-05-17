@@ -90,7 +90,7 @@ function SWITCH_SCREEN(targetId: SCREEN_ID): void {
 	if (target !== oldCur) {
 		target.bodyElem.style.display = ""; // Hand back control to CSS.
         target.buttonElem.dataset["screenCurrent"] = ""; // exists.
-        mainScroll?.hideModal();
+        main?.hideModal();
 		if (oldCur) {
 			// ^Check for edge-case (__CURRENT_SCREEN start off as undefined).
 			oldCur.bodyElem.style.display = "none";
@@ -106,13 +106,13 @@ SWITCH_SCREEN(SCREEN_ID.MAIN);
 /**
  *
  */
-class MainScroll {
+class TopLevel {
     public  readonly artHostElem: HTMLElement;
     private readonly svgTemplate: Promise<SVGSVGElement>;
-    private readonly slots: MainScroll.Slot[];
+    private readonly slots: TopLevel.Slot[];
 
     private readonly modalElem:          HTMLElement;
-    private          modalCurrentSlot:   MainScroll.Slot;
+    private          modalCurrentSlot:   TopLevel.Slot;
     private readonly modalImageElem:     HTMLImageElement;
     private readonly modalMessageElem:   HTMLElement;
 
@@ -203,7 +203,7 @@ class MainScroll {
         const __allSlots = Array.from(boxesLayer.children) as SVGRectElement[];
         // ^A nascent version of allSlots defined to allow getting `length / 2`.
         const prevNumSlots = this.slots.length;
-		const displayModal = (slotSelf: MainScroll.Slot) => {
+		const displayModal = (slotSelf: TopLevel.Slot) => {
             this.setModalSubmission(slotSelf);
             this.showModal();
         };
@@ -215,7 +215,7 @@ class MainScroll {
 			// Sort by Y-position, breaking ties by X-position.
             .map((rect) => Object.freeze({ rect, x: rect.x.baseVal.value, y: rect.y.baseVal.value, }))
             .sort((a,b) => a.x - b.x).sort((a,b) => a.y - b.y)
-            .map((desc, index) => new MainScroll.Slot(
+            .map((desc, index) => new TopLevel.Slot(
 				prevNumSlots + index,
 				displayModal,
 				desc.rect,
@@ -228,7 +228,7 @@ class MainScroll {
     /**
      * Throws an error if the slot is not empty.
      */
-    public async fillSlot(slotId: MainScroll.Slot.Id, imageFileName: string): Promise<void> {
+    public async fillSlot(slotId: TopLevel.Slot.Id, imageFileName: string): Promise<void> {
         if (slotId < this.slots.length) {
             const slot = this.slots[slotId];
             if (!slot.isEmpty) throw new Error(`slot \`${slotId}\` is already occupied`);
@@ -241,29 +241,24 @@ class MainScroll {
         }
     }
 
-    public setModalSubmission(slot: MainScroll.Slot): void {
+    public setModalSubmission(slot: TopLevel.Slot): void {
         this.modalCurrentSlot = slot;
         this.modalImageElem.src = slot.imageSource!;
         this.modalMessageElem.innerText = slot.messageString!;
     }
     public showModal(): void {
-        // Make sure the padding-box excludes the nav bar:
-        this.modalElem.style.borderTopWidth =
-            document.getElementsByTagName("nav")[0]
-            .getBoundingClientRect().height + "px";
-
-        document.body.style.overflow = "hidden";
+        document.getElementById("top-under-nav-wrapper")!.style.overflowY = "hidden";
         this.artHostElem.dataset["showModal"] = "";
         this.modalElem.dataset["showModal"] = "";
         this.modalElem.focus();
     }
     public hideModal(): void {
-        document.body.style.overflow = "";
+        document.getElementById("top-under-nav-wrapper")!.style.overflow = "";
         delete this.artHostElem.dataset["showModal"];
         delete this.modalElem.dataset["showModal"];
     }
 }
-namespace MainScroll {
+namespace TopLevel {
     /**
      *
      */
@@ -342,11 +337,11 @@ namespace MainScroll {
     Object.freeze(Slot);
 	Object.freeze(Slot.prototype);
 }
-Object.freeze(MainScroll);
-Object.freeze(MainScroll.prototype);
+Object.freeze(TopLevel);
+Object.freeze(TopLevel.prototype);
 
 
 /**
  * Instantiate it:
  */
-const mainScroll = new MainScroll();
+const main = new TopLevel();

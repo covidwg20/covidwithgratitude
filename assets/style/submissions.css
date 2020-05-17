@@ -45,7 +45,6 @@
     overflow:       auto;
     border:         0px solid transparent;
     padding:        1.7rem;
-    padding-top:    0.5rem;
     opacity:        0.0;
     transition: opacity 0.5s ease-in-out;
 }
