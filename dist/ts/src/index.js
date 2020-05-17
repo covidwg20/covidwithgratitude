@@ -119,7 +119,7 @@ function SWITCH_SCREEN(targetId) {
     if (target !== oldCur) {
         target.bodyElem.style.display = "";
         target.buttonElem.dataset["screenCurrent"] = "";
-        mainScroll === null || mainScroll === void 0 ? void 0 : mainScroll.hideModal();
+        main === null || main === void 0 ? void 0 : main.hideModal();
         if (oldCur) {
             oldCur.bodyElem.style.display = "none";
             delete oldCur.buttonElem.dataset["screenCurrent"];
@@ -128,8 +128,8 @@ function SWITCH_SCREEN(targetId) {
     }
 }
 SWITCH_SCREEN(SCREEN_ID.MAIN);
-var MainScroll = (function () {
-    function MainScroll() {
+var Main = (function () {
+    function Main() {
         var _this = this;
         this.artHostElem = document.getElementById("main-content");
         this.svgTemplate = makeRequest(GITHUB_FILES.urlAssetsGetRaw + "artwork.svg").then(function (xhr) {
@@ -164,50 +164,19 @@ var MainScroll = (function () {
                 }
             });
         }); });
-        var modal = this.modalElem
-            = document.getElementById("submission-modal");
-        modal.tabIndex = 0;
-        var modalNavPrev = function () {
-            for (var i = _this.modalCurrentSlot.id - 1; i >= 0; i--) {
-                var slot = _this.slots[i];
-                if (!slot.isEmpty) {
-                    _this.setModalSubmission(slot);
-                    break;
-                }
-            }
+        var modal = {
+            turnOffScrollElem: document.getElementById("top-under-nav-wrapper"),
+            baseElem: document.getElementById("submission-modal"),
+            imageElem: document.getElementById("submission-view-image"),
+            messageElem: document.getElementById("submission-view-message"),
+            navPrev: document.getElementById("submission-view-prev"),
+            navNext: document.getElementById("submission-view-next"),
         };
-        var modalNavNext = function () {
-            var numSlots = _this.slots.length;
-            for (var i = _this.modalCurrentSlot.id + 1; i < numSlots; i++) {
-                var slot = _this.slots[i];
-                if (!slot.isEmpty) {
-                    _this.setModalSubmission(slot);
-                    break;
-                }
-            }
-        };
-        modal.addEventListener("keydown", function (ev) {
-            if (ev.key === "Escape") {
-                _this.hideModal();
-            }
-            else if (ev.key === "ArrowLeft") {
-                modalNavPrev();
-            }
-            else if (ev.key === "ArrowRight") {
-                modalNavNext();
-            }
-        });
-        modal.addEventListener("click", function (ev) {
-            if (ev.target === modal) {
-                _this.hideModal();
-            }
-        });
-        document.getElementById("submission-view-prev").onclick = modalNavPrev;
-        document.getElementById("submission-view-next").onclick = modalNavNext;
-        this.modalImageElem = document.getElementById("submission-view-image");
-        this.modalMessageElem = document.getElementById("submission-view-message");
+        this.modal = Object.assign(Object.create(null), modal);
+        this.__addModalListeners();
+        this.hideModal();
     }
-    MainScroll.prototype.extendArtwork = function () {
+    Main.prototype.extendArtwork = function () {
         return __awaiter(this, void 0, void 0, function () {
             var newSvgCopy, boxesLayer, __allSlots, prevNumSlots, displayModal, newSlots;
             var _a;
@@ -228,7 +197,7 @@ var MainScroll = (function () {
                         newSlots = __allSlots.splice(__allSlots.length / 2)
                             .map(function (rect) { return Object.freeze({ rect: rect, x: rect.x.baseVal.value, y: rect.y.baseVal.value, }); })
                             .sort(function (a, b) { return a.x - b.x; }).sort(function (a, b) { return a.y - b.y; })
-                            .map(function (desc, index) { return new MainScroll.Slot(prevNumSlots + index, displayModal, desc.rect); });
+                            .map(function (desc, index) { return new Main.Slot(prevNumSlots + index, displayModal, desc.rect); });
                         (_a = this.slots).push.apply(_a, newSlots);
                         this.artHostElem.appendChild(newSvgCopy);
                         return [2];
@@ -236,7 +205,7 @@ var MainScroll = (function () {
             });
         });
     };
-    MainScroll.prototype.fillSlot = function (slotId, imageFileName) {
+    Main.prototype.fillSlot = function (slotId, imageFileName) {
         return __awaiter(this, void 0, void 0, function () {
             var slot;
             return __generator(this, function (_a) {
@@ -260,28 +229,71 @@ var MainScroll = (function () {
             });
         });
     };
-    MainScroll.prototype.setModalSubmission = function (slot) {
+    Main.prototype.setModalSubmission = function (slot) {
         this.modalCurrentSlot = slot;
-        this.modalImageElem.src = slot.imageSource;
-        this.modalMessageElem.innerText = slot.messageString;
+        this.modal.imageElem.src = slot.imageSource;
+        this.modal.messageElem.innerText = slot.messageString;
     };
-    MainScroll.prototype.showModal = function () {
-        this.modalElem.style.borderTopWidth =
-            document.getElementsByTagName("nav")[0]
-                .getBoundingClientRect().height + "px";
-        document.body.style.overflow = "hidden";
+    Main.prototype.showModal = function () {
+        this.modal.baseElem.tabIndex = 0;
+        this.modal.navPrev.disabled = false;
+        this.modal.navNext.disabled = false;
+        this.modal.turnOffScrollElem.style.overflowY = "hidden";
         this.artHostElem.dataset["showModal"] = "";
-        this.modalElem.dataset["showModal"] = "";
-        this.modalElem.focus();
+        this.modal.baseElem.dataset["showModal"] = "";
+        this.modal.baseElem.focus();
     };
-    MainScroll.prototype.hideModal = function () {
-        document.body.style.overflow = "";
+    Main.prototype.hideModal = function () {
+        this.modal.baseElem.tabIndex = -1;
+        this.modal.navPrev.disabled = true;
+        this.modal.navNext.disabled = true;
+        this.modal.turnOffScrollElem.style.overflow = "";
         delete this.artHostElem.dataset["showModal"];
-        delete this.modalElem.dataset["showModal"];
+        delete this.modal.baseElem.dataset["showModal"];
     };
-    return MainScroll;
+    Main.prototype.__addModalListeners = function () {
+        var _this = this;
+        var modalNavPrev = function () {
+            for (var i = _this.modalCurrentSlot.id - 1; i >= 0; i--) {
+                var slot = _this.slots[i];
+                if (!slot.isEmpty) {
+                    _this.setModalSubmission(slot);
+                    break;
+                }
+            }
+        };
+        var modalNavNext = function () {
+            var numSlots = _this.slots.length;
+            for (var i = _this.modalCurrentSlot.id + 1; i < numSlots; i++) {
+                var slot = _this.slots[i];
+                if (!slot.isEmpty) {
+                    _this.setModalSubmission(slot);
+                    break;
+                }
+            }
+        };
+        this.modal.baseElem.addEventListener("keydown", function (ev) {
+            if (ev.key === "Escape") {
+                _this.hideModal();
+            }
+            else if (ev.key === "ArrowLeft") {
+                modalNavPrev();
+            }
+            else if (ev.key === "ArrowRight") {
+                modalNavNext();
+            }
+        });
+        this.modal.baseElem.addEventListener("click", function (ev) {
+            if (ev.target === _this.modal.baseElem) {
+                _this.hideModal();
+            }
+        });
+        this.modal.navPrev.onclick = modalNavPrev;
+        this.modal.navNext.onclick = modalNavNext;
+    };
+    return Main;
 }());
-(function (MainScroll) {
+(function (Main) {
     var Slot = (function () {
         function Slot(id, displayModal, rect) {
             this.id = id;
@@ -348,11 +360,14 @@ var MainScroll = (function () {
         });
         return Slot;
     }());
-    MainScroll.Slot = Slot;
+    Main.Slot = Slot;
     Object.freeze(Slot);
     Object.freeze(Slot.prototype);
-})(MainScroll || (MainScroll = {}));
-Object.freeze(MainScroll);
-Object.freeze(MainScroll.prototype);
-var mainScroll = new MainScroll();
+})(Main || (Main = {}));
+Object.freeze(Main);
+Object.freeze(Main.prototype);
+var main = new Main();
+window.setTimeout(function () {
+    document.body.classList.remove("top-no-transitions-pre-load");
+}, 200);
 //# sourceMappingURL=index.js.map

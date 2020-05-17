@@ -18,7 +18,7 @@
     </head>
 
 
-    <body style="margin:0;">
+    <body style="margin:0;" class="top-no-transitions-pre-load">
     <!-- NAVIGATION -->
         <nav>
         <!-- note: ID's for js to hook up navigation. -->
@@ -33,7 +33,6 @@
                 <!-- TODO logo goes here -->
             </span>
         </nav>
-
     <!-- VIEW SUBMISSION MODAL -->
         <div id="submission-modal" class="fill-parent center-contents">
         <div id="submission-view">
@@ -46,6 +45,10 @@
             </div>
         </div>
         </div>
+
+    <!-- EVERYTHING UNDER THE NAV BAR -->
+    <div id="top-under-nav-wrapper">
+        <div><!-- Vertical Alignment Dummy --></div>
     <!-- MAIN CONTENT -->
         <div class="cwg-screen" id="screen-main">
             <div id="sticky-detector"></div>
@@ -109,6 +112,7 @@
                 <span id="goto-screen-privacy-policy">Privacy Policy</span>
             </span>
         </footer>
+    </div>
     <script defer src="dist/ts/src/index.js"></script>
     </body>
 </html>
