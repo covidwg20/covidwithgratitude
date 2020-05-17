@@ -3,10 +3,6 @@
     cursor:         pointer;
     contain:        content;
 
-    border-color:   transparent;
-    border-style:   solid;
-    border-width:   0.2rem  0rem;
-
     transition-property: transform;
     transition-duration: 0.35s;
     transition-timing-function: ease-in-out;
@@ -43,7 +39,7 @@ nav > .nav-side {
 nav > .nav-side > * {
     display:        flex;
     align-items:    center;
-    padding:        0.2rem  0.8rem;
+    padding:        0.7rem  0.8rem;
     background-color: inherit;
 }
 .nav-title {

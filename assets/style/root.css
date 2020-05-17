@@ -17,6 +17,14 @@
     background-color: var(--colour-white);
 }
 
+.top-no-transitions-pre-load * {
+  transition:           none !important;
+  -webkit-transition:   none !important;
+  -moz-transition:      none !important;
+  -ms-transition:       none !important;
+  -o-transition:        none !important;
+}
+
 html {
     scroll-behavior: smooth;
 }

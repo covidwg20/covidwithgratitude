@@ -106,15 +106,20 @@ SWITCH_SCREEN(SCREEN_ID.MAIN);
 /**
  *
  */
-class TopLevel {
+class Main {
     public  readonly artHostElem: HTMLElement;
-    private readonly svgTemplate: Promise<SVGSVGElement>;
-    private readonly slots: TopLevel.Slot[];
+    public readonly svgTemplate: Promise<SVGSVGElement>;
+    private readonly slots: Main.Slot[];
 
-    private readonly modalElem:          HTMLElement;
-    private          modalCurrentSlot:   TopLevel.Slot;
-    private readonly modalImageElem:     HTMLImageElement;
-    private readonly modalMessageElem:   HTMLElement;
+    private readonly modal: Readonly<{
+        turnOffScrollElem: HTMLElement;
+        baseElem:       HTMLElement;
+        imageElem:      HTMLImageElement;
+        messageElem:    HTMLDivElement;
+        navPrev:        HTMLButtonElement;
+        navNext:        HTMLButtonElement;
+    }>;
+    private modalCurrentSlot: Main.Slot;
 
     public constructor() {
         this.artHostElem = document.getElementById("main-content")!;
@@ -140,47 +145,17 @@ class TopLevel {
         });
 
         // Initialize modal:
-        const modal
-            = this.modalElem
-            = document.getElementById("submission-modal")!;
-        modal.tabIndex = 0;
-        const modalNavPrev = () => {
-            for (let i = this.modalCurrentSlot.id - 1; i >= 0; i--) {
-                const slot = this.slots[i];
-                if (!slot.isEmpty) {
-                    this.setModalSubmission(slot);
-                    break;
-                }
-            }
-        }
-        const modalNavNext = () => {
-            const numSlots = this.slots.length;
-            for (let i = this.modalCurrentSlot.id + 1; i < numSlots; i++) {
-                const slot = this.slots[i];
-                if (!slot.isEmpty) {
-                    this.setModalSubmission(slot);
-                    break;
-                }
-            }
-        }
-        modal.addEventListener("keydown", (ev) => {
-            if (ev.key === "Escape") {
-                this.hideModal();
-            } else if (ev.key === "ArrowLeft") {
-                modalNavPrev();
-            } else if (ev.key === "ArrowRight") {
-                modalNavNext();
-            }
-        });
-        modal.addEventListener("click", (ev) => {
-            if (ev.target === modal) {
-                this.hideModal();
-            }
-        });
-        document.getElementById("submission-view-prev")!.onclick = modalNavPrev;
-        document.getElementById("submission-view-next")!.onclick = modalNavNext;
-        this.modalImageElem = (document.getElementById("submission-view-image") as HTMLImageElement);
-        this.modalMessageElem = document.getElementById("submission-view-message")!;
+        const modal: Main["modal"] = {
+            turnOffScrollElem: document.getElementById("top-under-nav-wrapper")!,
+            baseElem:    document.getElementById("submission-modal")!,
+            imageElem:   document.getElementById("submission-view-image")   as HTMLImageElement,
+            messageElem: document.getElementById("submission-view-message") as HTMLDivElement,
+            navPrev:     document.getElementById("submission-view-prev")    as HTMLButtonElement,
+            navNext:     document.getElementById("submission-view-next")    as HTMLButtonElement,
+        };
+        this.modal = Object.assign(Object.create(null), modal);
+        this.__addModalListeners();
+        this.hideModal(); // <-- Disable tabbing to its nav buttons.
     }
 
     /**
@@ -203,7 +178,7 @@ class TopLevel {
         const __allSlots = Array.from(boxesLayer.children) as SVGRectElement[];
         // ^A nascent version of allSlots defined to allow getting `length / 2`.
         const prevNumSlots = this.slots.length;
-		const displayModal = (slotSelf: TopLevel.Slot) => {
+		const displayModal = (slotSelf: Main.Slot) => {
             this.setModalSubmission(slotSelf);
             this.showModal();
         };
@@ -215,7 +190,7 @@ class TopLevel {
 			// Sort by Y-position, breaking ties by X-position.
             .map((rect) => Object.freeze({ rect, x: rect.x.baseVal.value, y: rect.y.baseVal.value, }))
             .sort((a,b) => a.x - b.x).sort((a,b) => a.y - b.y)
-            .map((desc, index) => new TopLevel.Slot(
+            .map((desc, index) => new Main.Slot(
 				prevNumSlots + index,
 				displayModal,
 				desc.rect,
@@ -228,7 +203,7 @@ class TopLevel {
     /**
      * Throws an error if the slot is not empty.
      */
-    public async fillSlot(slotId: TopLevel.Slot.Id, imageFileName: string): Promise<void> {
+    public async fillSlot(slotId: Main.Slot.Id, imageFileName: string): Promise<void> {
         if (slotId < this.slots.length) {
             const slot = this.slots[slotId];
             if (!slot.isEmpty) throw new Error(`slot \`${slotId}\` is already occupied`);
@@ -241,24 +216,68 @@ class TopLevel {
         }
     }
 
-    public setModalSubmission(slot: TopLevel.Slot): void {
+    public setModalSubmission(slot: Main.Slot): void {
         this.modalCurrentSlot = slot;
-        this.modalImageElem.src = slot.imageSource!;
-        this.modalMessageElem.innerText = slot.messageString!;
+        this.modal.imageElem.src = slot.imageSource!;
+        this.modal.messageElem.innerText = slot.messageString!;
     }
     public showModal(): void {
-        document.getElementById("top-under-nav-wrapper")!.style.overflowY = "hidden";
+        this.modal.baseElem.tabIndex = 0; // Allow clicking background to exit modal.
+        this.modal.navPrev.disabled = false;
+        this.modal.navNext.disabled = false;
+        this.modal.turnOffScrollElem.style.overflowY = "hidden";
         this.artHostElem.dataset["showModal"] = "";
-        this.modalElem.dataset["showModal"] = "";
-        this.modalElem.focus();
+        this.modal.baseElem.dataset["showModal"] = "";
+        this.modal.baseElem.focus();
     }
     public hideModal(): void {
-        document.getElementById("top-under-nav-wrapper")!.style.overflow = "";
+        this.modal.baseElem.tabIndex = -1;
+        this.modal.navPrev.disabled = true;
+        this.modal.navNext.disabled = true;
+        this.modal.turnOffScrollElem.style.overflow = "";
         delete this.artHostElem.dataset["showModal"];
-        delete this.modalElem.dataset["showModal"];
+        delete this.modal.baseElem.dataset["showModal"];
+    }
+
+    private __addModalListeners(): void {
+        const modalNavPrev = () => {
+            for (let i = this.modalCurrentSlot.id - 1; i >= 0; i--) {
+                const slot = this.slots[i];
+                if (!slot.isEmpty) {
+                    this.setModalSubmission(slot);
+                    break;
+                }
+            }
+        }
+        const modalNavNext = () => {
+            const numSlots = this.slots.length;
+            for (let i = this.modalCurrentSlot.id + 1; i < numSlots; i++) {
+                const slot = this.slots[i];
+                if (!slot.isEmpty) {
+                    this.setModalSubmission(slot);
+                    break;
+                }
+            }
+        }
+        this.modal.baseElem.addEventListener("keydown", (ev) => {
+            if (ev.key === "Escape") {
+                this.hideModal();
+            } else if (ev.key === "ArrowLeft") {
+                modalNavPrev();
+            } else if (ev.key === "ArrowRight") {
+                modalNavNext();
+            }
+        });
+        this.modal.baseElem.addEventListener("click", (ev) => {
+            if (ev.target === this.modal.baseElem) {
+                this.hideModal();
+            }
+        });
+        this.modal.navPrev.onclick = modalNavPrev;
+        this.modal.navNext.onclick = modalNavNext;
     }
 }
-namespace TopLevel {
+namespace Main {
     /**
      *
      */
@@ -337,11 +356,14 @@ namespace TopLevel {
     Object.freeze(Slot);
 	Object.freeze(Slot.prototype);
 }
-Object.freeze(TopLevel);
-Object.freeze(TopLevel.prototype);
+Object.freeze(Main);
+Object.freeze(Main.prototype);
 
 
 /**
  * Instantiate it:
  */
-const main = new TopLevel();
+const main = new Main();
+window.setTimeout(() => {
+    document.body.classList.remove("top-no-transitions-pre-load");
+}, 200);
