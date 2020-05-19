@@ -22,6 +22,7 @@ nav {
     overflow:       hidden;
     height:         fit-content;
     padding:        0rem  0.3rem;
+    border-bottom:  0.1em dotted #00000010;
 
     display:        flex;
     justify-content: space-between;
@@ -63,10 +64,16 @@ nav > .nav-side > * {
     font-style:     italic;
     background-color: var(--colour-tone0);
 }
-#main-blurb {
-    padding:        2rem;
-    font-size:      75%;
+#main-blurb-wrapper {
+    padding:        1rem;
     background-color: var(--colour-white);
+    display:        flex;
+    justify-content: center;
+    font-size:      85%;
+}
+#main-blurb {
+    max-width:      33em;
+    line-height:    190%;
 }
 
 

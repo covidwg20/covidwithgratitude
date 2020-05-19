@@ -2,18 +2,31 @@
 #screen-contribute {
     counter-reset:  contribute-step;
 }
-#screen-contribute ol {
+#screen-contribute > ol {
     padding-inline-start: unset;
-}
-#screen-contribute li {
     display:        grid;
-    margin:         0.8em;
+    justify-content: center;
+    gap:            1em;
 }
-#screen-contribute li::before {
+#screen-contribute > ol > li {
+    margin:         0.8em;
+    max-width:      37em;
+    display:        grid;
+    gap:            0.7em;
+}
+#screen-contribute > ol > li::before {
     counter-increment: contribute-step;
     content:        counter(contribute-step) ". ";
     font-size:      1.5em;
     font-family:    "Abril Fatface", "Georgia", cursive;
+}
+#screen-contribute h3 {
+    margin:         0;
+}
+/* Nested lists: */
+#screen-contribute > ol ol {
+    display: inline-grid;
+    text-align: start;
 }
 
 
