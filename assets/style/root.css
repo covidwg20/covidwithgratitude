@@ -53,7 +53,7 @@ body {
     min-height:     fit-content;
 }
 
-h1, h2 {
+h1 {
     color:          var(--colour-pink);
     font-family:    "Abril Fatface", "Georgia", cursive;
 }

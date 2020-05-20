@@ -143,6 +143,10 @@ class Main {
                 await this.fillSlot(id, submissions[id]);
             }
         });
+        if (this.slots.length === 0) {
+            // There are no submissions yet. Show one empty copy of the artwork.
+            this.extendArtwork();
+        }
 
         // Initialize modal:
         const modal: Main["modal"] = {
@@ -197,6 +201,7 @@ class Main {
 			));
         this.slots.push(...newSlots);
 
+        const wrapper = document.createElementNS(SVG_NSPS, "svg");
         this.artHostElem.appendChild(newSvgCopy);
     }
 
