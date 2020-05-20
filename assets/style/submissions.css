@@ -43,7 +43,6 @@
 #submission-modal {
     z-index:        500;
     pointer-events: none;
-    grid-row:       2 !important; /* Fixate under the nav bar. */
     contain:        content;
     overflow:       auto;
     padding:        1.7rem;
