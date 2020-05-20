@@ -43,7 +43,8 @@ body {
     grid-template-rows: min-content auto;
 }
 #top-under-nav-wrapper {
-    overflow:       hidden auto;
+    grid-row:       2 !important;
+    overflow-y:     auto;
     contain:        strict;
     display:        flex;
     flex-flow:      column;
@@ -51,6 +52,9 @@ body {
 }
 #top-under-nav-wrapper > * {
     min-height:     fit-content;
+}
+#submission-modal {
+    grid-row:       2 !important; /* Fixate under the nav bar. */
 }
 
 h1 {
