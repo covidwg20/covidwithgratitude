@@ -40,12 +40,15 @@ body {
     top:0; left:0; bottom:0; right:0;
 
     display:        grid;
-    grid-template-rows: min-content auto;
+    grid-template:
+    "nav" min-content
+    "main" auto
+    / 1fr;
 }
 #top-under-nav-wrapper {
-    grid-row:       2 !important;
+    grid-area:      main;
     overflow-y:     auto;
-    contain:        strict;
+    contain:        content;
     display:        flex;
     flex-flow:      column;
     justify-content: space-between;
@@ -54,7 +57,7 @@ body {
     min-height:     fit-content;
 }
 #submission-modal {
-    grid-row:       2 !important; /* Fixate under the nav bar. */
+    grid-area:      main;
 }
 
 h1 {
