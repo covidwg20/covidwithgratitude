@@ -1,22 +1,42 @@
 
+/** ===================================================
+ * CONTRIBUTE
+ */
 #screen-contribute {
     counter-reset:  contribute-step;
+    padding:        0.8em;
 }
-#screen-contribute ol {
+#screen-contribute > ol {
     padding-inline-start: unset;
-}
-#screen-contribute li {
     display:        grid;
-    margin:         0.8em;
+    justify-content: center;
+    padding:        4em  0em;
+    gap:            4em;
 }
-#screen-contribute li::before {
+#screen-contribute > ol > li {
+    max-width:      37em;
+    display:        grid;
+    gap:            0.7em;
+}
+#screen-contribute > ol > li::before {
     counter-increment: contribute-step;
     content:        counter(contribute-step) ". ";
     font-size:      1.5em;
     font-family:    "Abril Fatface", "Georgia", cursive;
 }
+#screen-contribute h2 {
+    margin:         0;
+    font-size:      1.3em;
+}
+/* Nested lists: */
+#screen-contribute > ol ol {
+    display: inline-grid;
+    text-align: start;
+}
 
-
+/** ===================================================
+ * CONTACT INFO
+ */
 #contact-info-content-wrapper {
     margin:         2.0em;
     display:        grid;
@@ -44,4 +64,15 @@
     #contact-info-content-wrapper img {
         height:         100%;
     }
+}
+
+/** ===================================================
+ * TERMS AND CONDITIONS
+ */
+#terms-and-conditions-content, #privacy-policy-content {
+    padding:            2em;
+    text-align:         start;
+    line-height:        180%;
+    max-width:          40em;
+    margin:             auto;
 }

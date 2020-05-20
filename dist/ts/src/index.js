@@ -164,6 +164,9 @@ var Main = (function () {
                 }
             });
         }); });
+        if (this.slots.length === 0) {
+            this.extendArtwork();
+        }
         var modal = {
             turnOffScrollElem: document.getElementById("top-under-nav-wrapper"),
             baseElem: document.getElementById("submission-modal"),
@@ -178,7 +181,7 @@ var Main = (function () {
     }
     Main.prototype.extendArtwork = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var newSvgCopy, boxesLayer, __allSlots, prevNumSlots, displayModal, newSlots;
+            var newSvgCopy, boxesLayer, __allSlots, prevNumSlots, displayModal, newSlots, wrapper;
             var _a;
             var _this = this;
             return __generator(this, function (_b) {
@@ -199,6 +202,7 @@ var Main = (function () {
                             .sort(function (a, b) { return a.x - b.x; }).sort(function (a, b) { return a.y - b.y; })
                             .map(function (desc, index) { return new Main.Slot(prevNumSlots + index, displayModal, desc.rect); });
                         (_a = this.slots).push.apply(_a, newSlots);
+                        wrapper = document.createElementNS(SVG_NSPS, "svg");
                         this.artHostElem.appendChild(newSvgCopy);
                         return [2];
                 }

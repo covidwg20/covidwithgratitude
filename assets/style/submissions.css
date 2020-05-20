@@ -15,6 +15,9 @@
     background-repeat:  repeat;
     background-origin:  border-box; */
 }
+#main-content > * {
+    display:            block;
+}
 
 .submission {
     pointer-events: none;
