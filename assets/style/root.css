@@ -47,6 +47,7 @@ body {
 }
 #top-under-nav-wrapper {
     grid-area:      main;
+    grid-row:       2; /* Fix needed for Safari. Must go after grid-area property. */
     overflow-y:     auto;
     contain:        content;
     display:        flex;
@@ -58,6 +59,7 @@ body {
 }
 #submission-modal {
     grid-area:      main;
+    grid-row:       2; /* Fix needed for Safari. Must go after grid-area property. */
 }
 
 h1 {
