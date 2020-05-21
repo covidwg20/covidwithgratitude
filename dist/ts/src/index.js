@@ -140,6 +140,7 @@ var Main = (function () {
             xml.setAttribute("dominant-baseline", "middle");
         });
         this.slots = [];
+        this.contributeButton = document.getElementById("goto-screen-contribute");
         makeRequest(GITHUB_FILES.urlAssetsGetRaw + "existing.json")
             .then(function (xhr) { return JSON.parse(xhr.response); })
             .then(function (submissions) { return __awaiter(_this, void 0, void 0, function () {
@@ -181,7 +182,7 @@ var Main = (function () {
     }
     Main.prototype.extendArtwork = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var newSvgCopy, boxesLayer, __allSlots, prevNumSlots, displayModal, newSlots, wrapper;
+            var newSvgCopy, instructions, boxesLayer, __allSlots, prevNumSlots, displayModal, newSlots, wrapper;
             var _a;
             var _this = this;
             return __generator(this, function (_b) {
@@ -189,6 +190,11 @@ var Main = (function () {
                     case 0: return [4, this.svgTemplate];
                     case 1:
                         newSvgCopy = (_b.sent()).cloneNode(true);
+                        if (this.slots.length) {
+                            instructions = (newSvgCopy.getElementById("view_submission_instructions")
+                                || Array.from(newSvgCopy.children).find(function (child) { return child.id === "view_submission_instructions"; }));
+                            instructions.style.display = "none";
+                        }
                         boxesLayer = (newSvgCopy.getElementById("submission_boxes")
                             || Array.from(newSvgCopy.children).find(function (child) { return child.id === "submission_boxes"; }));
                         __allSlots = Array.from(boxesLayer.children);
@@ -200,7 +206,9 @@ var Main = (function () {
                         newSlots = __allSlots.splice(__allSlots.length / 2)
                             .map(function (rect) { return Object.freeze({ rect: rect, x: rect.x.baseVal.value, y: rect.y.baseVal.value, }); })
                             .sort(function (a, b) { return a.x - b.x; }).sort(function (a, b) { return a.y - b.y; })
-                            .map(function (desc, index) { return new Main.Slot(prevNumSlots + index, displayModal, desc.rect); });
+                            .map(function (desc, index) {
+                            return new Main.Slot(prevNumSlots + index, displayModal, desc.rect);
+                        });
                         (_a = this.slots).push.apply(_a, newSlots);
                         wrapper = document.createElementNS(SVG_NSPS, "svg");
                         this.artHostElem.appendChild(newSvgCopy);

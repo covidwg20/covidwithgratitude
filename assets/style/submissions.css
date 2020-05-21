@@ -34,8 +34,10 @@
     opacity:        0.7;
     transition:     fill 0.25s ease-out;
 }
+#submission_boxes > * {
+    pointer-events: initial;
+}
 .submission__image {
-    pointer-events: all;
     transition: transform 0.25s ease-out;
 }
 

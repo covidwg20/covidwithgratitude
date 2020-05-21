@@ -10,6 +10,7 @@
     padding-inline-start: unset;
     display:        grid;
     justify-content: center;
+    margin:         0em;
     padding:        4em  0em;
     gap:            4em;
 }
