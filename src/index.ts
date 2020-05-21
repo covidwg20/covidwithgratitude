@@ -26,7 +26,7 @@ class GitHubFiles {
     }
 }
 const GITHUB_FILES = new GitHubFiles(
-    { repoOwner: "covidwg20", repoName: "CovidWithGratitude", branch: "assets", },
+    { repoOwner: "covidwg20", repoName: "covidwithgratitude", branch: "assets", },
 );
 
 
