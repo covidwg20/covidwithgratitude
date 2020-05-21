@@ -108,8 +108,9 @@ SWITCH_SCREEN(SCREEN_ID.MAIN);
  */
 class Main {
     public  readonly artHostElem: HTMLElement;
-    public readonly svgTemplate: Promise<SVGSVGElement>;
+    public  readonly svgTemplate: Promise<SVGSVGElement>;
     private readonly slots: Main.Slot[];
+    private readonly contributeButton: HTMLElement;
 
     private readonly modal: Readonly<{
         turnOffScrollElem: HTMLElement;
@@ -131,6 +132,7 @@ class Main {
             xml.setAttribute("dominant-baseline", "middle");
         });
         this.slots = [];
+        this.contributeButton = document.getElementById("goto-screen-contribute")!;
 
         makeRequest(GITHUB_FILES.urlAssetsGetRaw + "existing.json")
         .then((xhr) => JSON.parse(xhr.response))
@@ -173,6 +175,14 @@ class Main {
      */
     public async extendArtwork(): Promise<void> {
         const newSvgCopy = (await this.svgTemplate).cloneNode(true) as SVGSVGElement;
+        if (this.slots.length) {
+            // If this is not the first copy, hide the submission-viewing instructions:
+            const instructions = (
+                newSvgCopy.getElementById("view_submission_instructions")
+                || Array.from(newSvgCopy.children).find((child) => child.id === "view_submission_instructions")
+            ) as SVGGElement;
+            instructions.style.display = "none";
+        }
 
         const boxesLayer = (
             newSvgCopy.getElementById("submission_boxes")
@@ -194,11 +204,23 @@ class Main {
 			// Sort by Y-position, breaking ties by X-position.
             .map((rect) => Object.freeze({ rect, x: rect.x.baseVal.value, y: rect.y.baseVal.value, }))
             .sort((a,b) => a.x - b.x).sort((a,b) => a.y - b.y)
-            .map((desc, index) => new Main.Slot(
-				prevNumSlots + index,
-				displayModal,
-				desc.rect,
-			));
+            .map((desc, index) => {
+                // Sneaky initialization:
+                // desc.rect.onpointerenter = (ev) => {
+                //     this.contributeButton.animate({
+                //         transform: ["scale(1)", "scale(1.2)", "scale(1.2)",],
+                //         easing: "ease-in-out",
+                //     }, {
+                //         direction: "alternate",
+                //         duration: 900,
+                //     });
+                // };
+                return new Main.Slot(
+                    prevNumSlots + index,
+                    displayModal,
+                    desc.rect,
+                );
+            });
         this.slots.push(...newSlots);
 
         const wrapper = document.createElementNS(SVG_NSPS, "svg");
