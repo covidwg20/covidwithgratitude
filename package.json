@@ -12,12 +12,12 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/covidwg20/CovidWithGratitude.git"
+    "url": "git+https://github.com/covidwg20/covidwithgratitude.git"
   },
   "bugs": {
-    "url": "https://github.com/covidwg20/CovidWithGratitude/issues"
+    "url": "https://github.com/covidwg20/covidwithgratitude/issues"
   },
-  "homepage": "https://github.com/covidwg20/CovidWithGratitude#readme",
+  "homepage": "https://github.com/covidwg20/covidwithgratitude#readme",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
