@@ -8,8 +8,11 @@ const jsonObj = {};
 smbDirs.forEach((sbmDirName) => {
     const sbmDirPath = path.resolve(sbmRoot, sbmDirName);
     if (fs.lstatSync(sbmDirPath).isDirectory()) {
-        jsonObj[sbmDirName] = fs.readdirSync(sbmDirPath)
-        .find((fileName) => fileName.match(/.((png)|(jpg)|(jpeg))$/i));
+        const filenames = fs.readdirSync(sbmDirPath);
+        jsonObj[sbmDirName] = {
+            img: filenames.find((fn) => fn.match(/.((png)|(jpg)|(jpeg))$/i)) || "",
+            msg: filenames.find((fn) => fn.match(/.((txt))$/i)) || "",
+        };
     }
 });
 fs.writeFile(
