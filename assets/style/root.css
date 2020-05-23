@@ -5,9 +5,6 @@
     --colour-title:     #79a9ad;
     --colour-white:     #ffffff;
     --colour-mainFg:    #4b4b4b;
-    --colour-mainFg-behind-shadow:#4b4b4b80;
-    /* ^For the background with box-shadow. I
-    really wish CSS had opacity functions. */
     --colour-tone0:     #eae1ca;
     --colour-pink:      #eaa38a;
 }

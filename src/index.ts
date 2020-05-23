@@ -245,8 +245,18 @@ class Main {
 
     public setModalSubmission(slot: Main.Slot): void {
         this.modalCurrentSlot = slot;
-        this.modal.imageElem.src = slot.imageSource;
-        this.modal.messageElem.innerText = slot.messageString;
+        if (slot.imageSource) {
+            this.modal.imageElem.src = slot.imageSource;
+            this.modal.imageElem.style.display = "";
+        } else {
+            this.modal.imageElem.style.display = "none";
+        }
+        if (slot.messageString) {
+            this.modal.messageElem.innerText = slot.messageString;
+            this.modal.messageElem.style.display = "";
+        } else {
+            this.modal.messageElem.style.display = "none";
+        }
     }
     public showModal(): void {
         this.modal.baseElem.tabIndex = 0; // Allow clicking background to exit modal.
@@ -372,7 +382,7 @@ namespace Main {
             }
         }
         public get isEmpty(): boolean {
-            return this.__image === undefined;
+            return this.imageSource === "" && this.messageString === "";
         }
         public get imageSource(): string {
             return this.__image?.href.baseVal || "";
