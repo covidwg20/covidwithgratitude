@@ -1,6 +1,6 @@
 const SVG_NSPS   = "http://www.w3.org/2000/svg";
 const XLINK_NSPS = "http://www.w3.org/1999/xlink";
-const IMAGE_REGEXP = /.((png)|(jpg)|(jpeg))$/i;
+const IMAGE_REGEXP = /.((png)|(jpg)|(jpeg))$/i; // If changed, also update the json-generator script.
 
 async function makeRequest(url: string, method: string = "GET"): Promise<XMLHttpRequest> {
     var request = new XMLHttpRequest();
@@ -142,7 +142,7 @@ class Main {
                 // Wait for each submission. It may take a while if it needs
                 // to extend the artwork, and we don't want to accidentally
                 // think we need to extend when we actually don't.
-                await this.fillSlot(id, submissions[id]);
+                await this.fillSlot(id, submissions[id] as Main.Slot.FilenameDesc);
             }
         });
         if (this.slots.length === 0) {
@@ -230,23 +230,23 @@ class Main {
     /**
      * Throws an error if the slot is not empty.
      */
-    public async fillSlot(slotId: Main.Slot.Id, imageFileName: string): Promise<void> {
+    public async fillSlot(slotId: Main.Slot.Id, desc: Main.Slot.FilenameDesc): Promise<void> {
         if (slotId < this.slots.length) {
             const slot = this.slots[slotId];
             if (!slot.isEmpty) throw new Error(`slot \`${slotId}\` is already occupied`);
-            slot.__fill(imageFileName);
+            slot.__fill(desc);
         } else {
             await this.extendArtwork();
             // Recurse, extending the artwork once each time until
             // the slot to be filled exists:
-            await this.fillSlot(slotId, imageFileName);
+            await this.fillSlot(slotId, desc);
         }
     }
 
     public setModalSubmission(slot: Main.Slot): void {
         this.modalCurrentSlot = slot;
-        this.modal.imageElem.src = slot.imageSource!;
-        this.modal.messageElem.innerText = slot.messageString!;
+        this.modal.imageElem.src = slot.imageSource;
+        this.modal.messageElem.innerText = slot.messageString;
     }
     public showModal(): void {
         this.modal.baseElem.tabIndex = 0; // Allow clicking background to exit modal.
@@ -345,40 +345,48 @@ namespace Main {
         /**
          * Do not use this directly. Use the wrapper defined in `MainScroll`.
          */
-        public __fill(imageFileName: string): void {
-            makeRequest(GITHUB_FILES.urlAssetsGetRaw
-                + this.id + "/message.txt").then((xhr) => {
-                this.__messageString = xhr.responseText;
-            })
-            const img = this.__image = document.createElementNS(SVG_NSPS, "image");
-            img.classList.add("submission__image");
-            img.tabIndex = 0; // Allow selection via tabbing and click.
-            img.onclick = (ev) => {
-                this.displayModal(this);
-            };
-            const imageSrc = GITHUB_FILES.urlAssetsGetRaw
-                + this.id + "/" + imageFileName;
-            img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
-            const isa = img.setAttribute.bind(img);
-            isa(     "x", "-50");
-            isa(     "y", "-50");
-            isa("height", "100");
-            isa( "width", "100");
-            isa("preserveAspectRatio", "xMidYMid slice");
-            this.baseElem.appendChild(img);
+        public __fill(desc: Slot.FilenameDesc): void {
+            if (desc.msg) {
+                makeRequest(GITHUB_FILES.urlAssetsGetRaw
+                    + this.id + "/" + desc.msg).then((xhr) => {
+                    this.__messageString = xhr.responseText;
+                });
+            }
+            if (desc.img) {
+                const img = this.__image = document.createElementNS(SVG_NSPS, "image");
+                img.classList.add("submission__image");
+                img.tabIndex = 0; // Allow selection via tabbing and click.
+                img.onclick = (ev) => {
+                    this.displayModal(this);
+                };
+                const imageSrc = GITHUB_FILES.urlAssetsGetRaw
+                    + this.id + "/" + desc.img;
+                img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
+                const isa = img.setAttribute.bind(img);
+                isa(     "x", "-50");
+                isa(     "y", "-50");
+                isa("height", "100");
+                isa( "width", "100");
+                isa("preserveAspectRatio", "xMidYMid slice");
+                this.baseElem.appendChild(img);
+            }
         }
         public get isEmpty(): boolean {
             return this.__image === undefined;
         }
-        public get imageSource(): string | undefined {
-            return this.__image?.href.baseVal;
+        public get imageSource(): string {
+            return this.__image?.href.baseVal || "";
         }
-        public get messageString(): string | undefined {
-            return this.__messageString;
+        public get messageString(): string {
+            return this.__messageString || "";
         }
     }
     export namespace Slot {
         export type Id = number;
+        export type FilenameDesc = Readonly<{
+            img: string;
+            msg: string;
+        }>;
     }
     Object.freeze(Slot);
 	Object.freeze(Slot.prototype);
