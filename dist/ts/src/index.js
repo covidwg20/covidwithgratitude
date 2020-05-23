@@ -217,7 +217,7 @@ var Main = (function () {
             });
         });
     };
-    Main.prototype.fillSlot = function (slotId, imageFileName) {
+    Main.prototype.fillSlot = function (slotId, desc) {
         return __awaiter(this, void 0, void 0, function () {
             var slot;
             return __generator(this, function (_a) {
@@ -227,12 +227,12 @@ var Main = (function () {
                         slot = this.slots[slotId];
                         if (!slot.isEmpty)
                             throw new Error("slot `" + slotId + "` is already occupied");
-                        slot.__fill(imageFileName);
+                        slot.__fill(desc);
                         return [3, 4];
                     case 1: return [4, this.extendArtwork()];
                     case 2:
                         _a.sent();
-                        return [4, this.fillSlot(slotId, imageFileName)];
+                        return [4, this.fillSlot(slotId, desc)];
                     case 3:
                         _a.sent();
                         _a.label = 4;
@@ -325,28 +325,32 @@ var Main = (function () {
             base.appendChild(idText);
             rect.insertAdjacentElement("afterend", base);
         }
-        Slot.prototype.__fill = function (imageFileName) {
+        Slot.prototype.__fill = function (desc) {
             var _this = this;
-            makeRequest(GITHUB_FILES.urlAssetsGetRaw
-                + this.id + "/message.txt").then(function (xhr) {
-                _this.__messageString = xhr.responseText;
-            });
-            var img = this.__image = document.createElementNS(SVG_NSPS, "image");
-            img.classList.add("submission__image");
-            img.tabIndex = 0;
-            img.onclick = function (ev) {
-                _this.displayModal(_this);
-            };
-            var imageSrc = GITHUB_FILES.urlAssetsGetRaw
-                + this.id + "/" + imageFileName;
-            img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
-            var isa = img.setAttribute.bind(img);
-            isa("x", "-50");
-            isa("y", "-50");
-            isa("height", "100");
-            isa("width", "100");
-            isa("preserveAspectRatio", "xMidYMid slice");
-            this.baseElem.appendChild(img);
+            if (desc.msg) {
+                makeRequest(GITHUB_FILES.urlAssetsGetRaw
+                    + this.id + "/" + desc.msg).then(function (xhr) {
+                    _this.__messageString = xhr.responseText;
+                });
+            }
+            if (desc.img) {
+                var img = this.__image = document.createElementNS(SVG_NSPS, "image");
+                img.classList.add("submission__image");
+                img.tabIndex = 0;
+                img.onclick = function (ev) {
+                    _this.displayModal(_this);
+                };
+                var imageSrc = GITHUB_FILES.urlAssetsGetRaw
+                    + this.id + "/" + desc.img;
+                img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
+                var isa = img.setAttribute.bind(img);
+                isa("x", "-50");
+                isa("y", "-50");
+                isa("height", "100");
+                isa("width", "100");
+                isa("preserveAspectRatio", "xMidYMid slice");
+                this.baseElem.appendChild(img);
+            }
         };
         Object.defineProperty(Slot.prototype, "isEmpty", {
             get: function () {
@@ -358,14 +362,14 @@ var Main = (function () {
         Object.defineProperty(Slot.prototype, "imageSource", {
             get: function () {
                 var _a;
-                return (_a = this.__image) === null || _a === void 0 ? void 0 : _a.href.baseVal;
+                return ((_a = this.__image) === null || _a === void 0 ? void 0 : _a.href.baseVal) || "";
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Slot.prototype, "messageString", {
             get: function () {
-                return this.__messageString;
+                return this.__messageString || "";
             },
             enumerable: true,
             configurable: true
