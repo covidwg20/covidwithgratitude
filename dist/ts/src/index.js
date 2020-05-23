@@ -243,8 +243,20 @@ var Main = (function () {
     };
     Main.prototype.setModalSubmission = function (slot) {
         this.modalCurrentSlot = slot;
-        this.modal.imageElem.src = slot.imageSource;
-        this.modal.messageElem.innerText = slot.messageString;
+        if (slot.imageSource) {
+            this.modal.imageElem.src = slot.imageSource;
+            this.modal.imageElem.style.display = "";
+        }
+        else {
+            this.modal.imageElem.style.display = "none";
+        }
+        if (slot.messageString) {
+            this.modal.messageElem.innerText = slot.messageString;
+            this.modal.messageElem.style.display = "";
+        }
+        else {
+            this.modal.messageElem.style.display = "none";
+        }
     };
     Main.prototype.showModal = function () {
         this.modal.baseElem.tabIndex = 0;
@@ -354,7 +366,7 @@ var Main = (function () {
         };
         Object.defineProperty(Slot.prototype, "isEmpty", {
             get: function () {
-                return this.__image === undefined;
+                return this.imageSource === "" && this.messageString === "";
             },
             enumerable: true,
             configurable: true
