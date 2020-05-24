@@ -194,6 +194,11 @@ var Main = (function () {
                             instructions = (newSvgCopy.getElementById("view_submission_instructions")
                                 || Array.from(newSvgCopy.children).find(function (child) { return child.id === "view_submission_instructions"; }));
                             instructions.style.display = "none";
+                            Array.from(newSvgCopy.children).forEach(function (child) {
+                                if (child.id.startsWith("oikos")) {
+                                    child.style.display = "none";
+                                }
+                            });
                         }
                         boxesLayer = (newSvgCopy.getElementById("submission_boxes")
                             || Array.from(newSvgCopy.children).find(function (child) { return child.id === "submission_boxes"; }));

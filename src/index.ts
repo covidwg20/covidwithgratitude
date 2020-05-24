@@ -182,6 +182,11 @@ class Main {
                 || Array.from(newSvgCopy.children).find((child) => child.id === "view_submission_instructions")
             ) as SVGGElement;
             instructions.style.display = "none";
+            Array.from(newSvgCopy.children).forEach((child) => {
+                if (child.id.startsWith("oikos")) {
+                    (child as SVGElement).style.display = "none";
+                }
+            });
         }
 
         const boxesLayer = (
