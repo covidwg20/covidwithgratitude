@@ -40,13 +40,19 @@ nav > .nav-side {
 nav > .nav-side > * {
     display:        flex;
     align-items:    center;
-    padding:        0.7rem  0.8rem;
+    padding:        0.4rem  0.8rem;
     background-color: inherit;
 }
 .nav-title {
     color:          var(--colour-title);
     font-size:      2.3em;
     font-family:    "Abril Fatface", "Georgia", cursive;
+}
+#nav-logo {
+    height:         2.9ex;
+    margin-right:   0.5ex;
+    align-self:     center;
+    border-radius:  0.5ex;
 }
 
 /* Responsive Nav Layout Rules */
