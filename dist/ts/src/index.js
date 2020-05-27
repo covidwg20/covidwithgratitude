@@ -164,10 +164,11 @@ var Main = (function () {
                     case 4: return [2];
                 }
             });
-        }); });
-        if (this.slots.length === 0) {
-            this.extendArtwork();
-        }
+        }); }).then(function () {
+            if (_this.slots.length === 0) {
+                _this.extendArtwork();
+            }
+        });
         var modal = {
             turnOffScrollElem: document.getElementById("top-under-nav-wrapper"),
             baseElem: document.getElementById("submission-modal"),
@@ -199,6 +200,8 @@ var Main = (function () {
                                     child.style.display = "none";
                                 }
                             });
+                        }
+                        else {
                         }
                         boxesLayer = (newSvgCopy.getElementById("submission_boxes")
                             || Array.from(newSvgCopy.children).find(function (child) { return child.id === "submission_boxes"; }));
