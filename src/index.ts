@@ -144,11 +144,12 @@ class Main {
                 // think we need to extend when we actually don't.
                 await this.fillSlot(id, submissions[id] as Main.Slot.FilenameDesc);
             }
+        }).then(() => {
+            if (this.slots.length === 0) {
+                // There are no submissions yet. Show one empty copy of the artwork.
+                this.extendArtwork();
+            }
         });
-        if (this.slots.length === 0) {
-            // There are no submissions yet. Show one empty copy of the artwork.
-            this.extendArtwork();
-        }
 
         // Initialize modal:
         const modal: Main["modal"] = {
@@ -187,6 +188,28 @@ class Main {
                     (child as SVGElement).style.display = "none";
                 }
             });
+        } else {
+            // const os = newSvgCopy.getElementById("oikos_squirrel") as SVGGElement;
+            // os.style.pointerEvents = "initial";
+            // os.onpointerenter = () => {
+            //     const osBox = os.getBBox();
+            //     const x = osBox.x + osBox.width/2;
+            //     const y = osBox.y + osBox.height/2;
+            //     const rotate = (degrees: number): string => {
+            //         return `rotate(${degrees} ${x.toString()} ${y.toString()})`;
+            //     };
+            //     os.animate({
+            //         transform: [
+            //             rotate(0),
+            //             rotate(120),
+            //             rotate(240),
+            //             rotate(0),
+            //         ],
+            //     }, {
+            //         iterations: 40,
+            //         duration: 1200,
+            //     });
+            // }
         }
 
         const boxesLayer = (
