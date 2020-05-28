@@ -362,13 +362,16 @@ namespace Main {
 			this.displayModal = displayModal;
             const base = this.baseElem = document.createElementNS(SVG_NSPS, "svg");
             base.classList.add("submission", "text-select-disabled");
+
+            const x = rect.x.baseVal, y = rect.y.baseVal, h = rect.height.baseVal, w = rect.width.baseVal;
             const bsa = base.setAttribute.bind(base);
-            bsa(     "x", rect.x.baseVal.valueAsString);
-            bsa(     "y", rect.y.baseVal.valueAsString);
-            bsa("height", rect.height.baseVal.valueAsString);
-            bsa( "width", rect.width.baseVal.valueAsString);
+            bsa(     "x", x.valueAsString);
+            bsa(     "y", y.valueAsString);
+            bsa("height", h.valueAsString);
+            bsa( "width", w.valueAsString);
             bsa("preserveAspectRatio", "xMidYMid slice");
-            bsa("viewBox", "-50 -50 100 100");
+
+            bsa("viewBox", `${-w.value/2} ${-h.value/2} ${w.value} ${h.value}`);
             // Create id text:
             const idText = document.createElementNS(SVG_NSPS, "text");
             idText.classList.add("submission__id-text");
@@ -400,11 +403,12 @@ namespace Main {
                 const imageSrc = GITHUB_FILES.urlAssetsGetRaw
                     + this.id + "/" + desc.img;
                 img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
+                const box = this.baseElem.viewBox.baseVal;
                 const isa = img.setAttribute.bind(img);
-                isa(     "x", "-50");
-                isa(     "y", "-50");
-                isa("height", "100");
-                isa( "width", "100");
+                isa(     "x", box.x.toString());
+                isa(     "y", box.y.toString());
+                isa("height", box.height.toString());
+                isa( "width", box.width.toString());
                 isa("preserveAspectRatio", "xMidYMid slice");
                 this.baseElem.appendChild(img);
             }
