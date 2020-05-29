@@ -30,7 +30,8 @@
     font-size:      1.3em;
 }
 /* Nested lists: */
-#screen-contribute > ol ol {
+#screen-contribute > ol ol,
+#screen-contribute > ol ul {
     display: inline-grid;
     text-align: start;
 }
