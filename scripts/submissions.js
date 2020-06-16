@@ -10,7 +10,7 @@ smbDirs.forEach((sbmDirName) => {
     if (fs.lstatSync(sbmDirPath).isDirectory()) {
         const filenames = fs.readdirSync(sbmDirPath);
         jsonObj[sbmDirName] = {
-            img: filenames.find((fn) => fn.match(/.((png)|(jpg)|(jpeg))$/i)) || "",
+            img: filenames.find((fn) => fn !== "thumb.jpg" && fn.match(/.((png)|(jpg)|(jpeg))$/i)) || "",
             //msg: filenames.find((fn) => fn.match(/.((txt))$/i)) || "",
         };
     }
