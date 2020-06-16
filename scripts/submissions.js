@@ -11,7 +11,7 @@ smbDirs.forEach((sbmDirName) => {
         const filenames = fs.readdirSync(sbmDirPath);
         jsonObj[sbmDirName] = {
             img: filenames.find((fn) => fn.match(/.((png)|(jpg)|(jpeg))$/i)) || "",
-            msg: filenames.find((fn) => fn.match(/.((txt))$/i)) || "",
+            //msg: filenames.find((fn) => fn.match(/.((txt))$/i)) || "",
         };
     }
 });
