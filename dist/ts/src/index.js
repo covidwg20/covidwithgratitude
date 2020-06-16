@@ -374,15 +374,16 @@ var Main = (function () {
         };
         Object.defineProperty(Slot.prototype, "isEmpty", {
             get: function () {
-                return this.imageSource === "" && this.messageString === "";
+                return this.messageString === "";
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Slot.prototype, "imageSource", {
             get: function () {
-                var _a;
-                return (_a = this.__imageFilename) !== null && _a !== void 0 ? _a : "";
+                return this.__imageFilename
+                    ? GITHUB_FILES.urlAssetsGetRaw + "/" + this.id + "/" + this.__imageFilename
+                    : "";
             },
             enumerable: true,
             configurable: true
