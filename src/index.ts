@@ -398,7 +398,7 @@ namespace Main {
                 img.onclick = (ev) => {
                     this.displayModal(this);
                 };
-                const imageSrc = GITHUB_FILES.urlAssetsGetRaw + this.id + "/thumb.jpeg";
+                const imageSrc = GITHUB_FILES.urlAssetsGetRaw + this.id + "/thumb.jpg";
                 img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
                 const box = this.baseElem.viewBox.baseVal;
                 const isa = img.setAttribute.bind(img);

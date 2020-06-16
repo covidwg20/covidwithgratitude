@@ -142,13 +142,13 @@ var Main = (function () {
         this.slots = [];
         this.contributeButton = document.getElementById("goto-screen-contribute");
         makeRequest(GITHUB_FILES.urlAssetsGetRaw + "existing.json")
-            .then(function (xhr) { return JSON.parse(xhr.response); })
+            .then(function (xhr) { return Object.freeze(JSON.parse(xhr.response)); })
             .then(function (submissions) { return __awaiter(_this, void 0, void 0, function () {
             var ids, _i, ids_1, id;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        ids = Object.keys(submissions).map(function (num) { return Number(num); }).sort(function (a, b) { return a - b; });
+                        ids = Object.keys(submissions).map(function (num) { return Number(num); });
                         _i = 0, ids_1 = ids;
                         _a.label = 1;
                     case 1:
@@ -183,7 +183,7 @@ var Main = (function () {
     }
     Main.prototype.extendArtwork = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var newSvgCopy, instructions, boxesLayer, __allSlots, prevNumSlots, displayModal, newSlots, wrapper;
+            var newSvgCopy, instructions, boxesLayer, __allSlots, prevNumSlots, displayModal, newSlots;
             var _a;
             var _this = this;
             return __generator(this, function (_b) {
@@ -218,7 +218,6 @@ var Main = (function () {
                             return new Main.Slot(prevNumSlots + index, displayModal, desc.rect);
                         });
                         (_a = this.slots).push.apply(_a, newSlots);
-                        wrapper = document.createElementNS(SVG_NSPS, "svg");
                         this.artHostElem.appendChild(newSvgCopy);
                         return [2];
                 }
@@ -348,21 +347,20 @@ var Main = (function () {
         }
         Slot.prototype.__fill = function (desc) {
             var _this = this;
-            if (desc.msg) {
-                makeRequest(GITHUB_FILES.urlAssetsGetRaw
-                    + this.id + "/" + desc.msg).then(function (xhr) {
-                    _this.__messageString = xhr.responseText;
-                });
-            }
+            this.__imageFilename = desc.img;
+            makeRequest(GITHUB_FILES.urlAssetsGetRaw + this.id + "/message.txt")
+                .then(function (xhr) {
+                _this.__messageString = xhr.responseText;
+            });
             if (desc.img) {
-                var img = this.__image = document.createElementNS(SVG_NSPS, "image");
+                var img = document.createElementNS(SVG_NSPS, "image");
                 img.classList.add("submission__image");
+                img.setAttribute("loading", "lazy");
                 img.tabIndex = 0;
                 img.onclick = function (ev) {
                     _this.displayModal(_this);
                 };
-                var imageSrc = GITHUB_FILES.urlAssetsGetRaw
-                    + this.id + "/" + desc.img;
+                var imageSrc = GITHUB_FILES.urlAssetsGetRaw + this.id + "/thumb.jpg";
                 img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
                 var box = this.baseElem.viewBox.baseVal;
                 var isa = img.setAttribute.bind(img);
@@ -384,14 +382,15 @@ var Main = (function () {
         Object.defineProperty(Slot.prototype, "imageSource", {
             get: function () {
                 var _a;
-                return ((_a = this.__image) === null || _a === void 0 ? void 0 : _a.href.baseVal) || "";
+                return (_a = this.__imageFilename) !== null && _a !== void 0 ? _a : "";
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Slot.prototype, "messageString", {
             get: function () {
-                return this.__messageString || "";
+                var _a;
+                return (_a = this.__messageString) !== null && _a !== void 0 ? _a : "";
             },
             enumerable: true,
             configurable: true
