@@ -135,14 +135,14 @@ class Main {
         this.contributeButton = document.getElementById("goto-screen-contribute")!;
 
         makeRequest(GITHUB_FILES.urlAssetsGetRaw + "existing.json")
-        .then((xhr) => JSON.parse(xhr.response))
+        .then((xhr) => Object.freeze(JSON.parse(xhr.response) as Record<Main.Slot.Id, Main.Slot.FilenameDesc>))
         .then(async (submissions) => {
-            const ids = Object.keys(submissions).map((num) => Number(num)).sort((a,b) => a - b);
+            const ids = Object.keys(submissions).map((num) => Number(num))/* .sort((a,b) => a - b) */;
             for (const id of ids) {
                 // Wait for each submission. It may take a while if it needs
                 // to extend the artwork, and we don't want to accidentally
                 // think we need to extend when we actually don't.
-                await this.fillSlot(id, submissions[id] as Main.Slot.FilenameDesc);
+                await this.fillSlot(id, submissions[id]);
             }
         }).then(() => {
             if (this.slots.length === 0) {
@@ -189,27 +189,27 @@ class Main {
                 }
             });
         } else {
-            // const os = newSvgCopy.getElementById("oikos_squirrel") as SVGGElement;
-            // os.style.pointerEvents = "initial";
-            // os.onpointerenter = () => {
-            //     const osBox = os.getBBox();
-            //     const x = osBox.x + osBox.width/2;
-            //     const y = osBox.y + osBox.height/2;
-            //     const rotate = (degrees: number): string => {
-            //         return `rotate(${degrees} ${x.toString()} ${y.toString()})`;
-            //     };
-            //     os.animate({
-            //         transform: [
-            //             rotate(0),
-            //             rotate(120),
-            //             rotate(240),
-            //             rotate(0),
-            //         ],
-            //     }, {
-            //         iterations: 40,
-            //         duration: 1200,
-            //     });
-            // }
+            /* const os = newSvgCopy.getElementById("oikos_squirrel") as SVGGElement;
+            os.style.pointerEvents = "initial";
+            os.onpointerenter = () => {
+                const osBox = os.getBBox();
+                const x = osBox.x + osBox.width/2;
+                const y = osBox.y + osBox.height/2;
+                const rotate = (degrees: number): string => {
+                    return `rotate(${degrees} ${x.toString()} ${y.toString()})`;
+                };
+                os.animate({
+                    transform: [
+                        rotate(0),
+                        rotate(120),
+                        rotate(240),
+                        rotate(0),
+                    ],
+                }, {
+                    iterations: 40,
+                    duration: 1200,
+                });
+            } */
         }
 
         const boxesLayer = (
@@ -234,15 +234,15 @@ class Main {
             .sort((a,b) => a.x - b.x).sort((a,b) => a.y - b.y)
             .map((desc, index) => {
                 // Sneaky initialization:
-                // desc.rect.onpointerenter = (ev) => {
-                //     this.contributeButton.animate({
-                //         transform: ["scale(1)", "scale(1.2)", "scale(1.2)",],
-                //         easing: "ease-in-out",
-                //     }, {
-                //         direction: "alternate",
-                //         duration: 900,
-                //     });
-                // };
+                /* desc.rect.onpointerenter = (ev) => {
+                    this.contributeButton.animate({
+                        transform: ["scale(1)", "scale(1.2)", "scale(1.2)",],
+                        easing: "ease-in-out",
+                    }, {
+                        direction: "alternate",
+                        duration: 900,
+                    });
+                }; */
                 return new Main.Slot(
                     prevNumSlots + index,
                     displayModal,
@@ -250,8 +250,6 @@ class Main {
                 );
             });
         this.slots.push(...newSlots);
-
-        const wrapper = document.createElementNS(SVG_NSPS, "svg");
         this.artHostElem.appendChild(newSvgCopy);
     }
 
@@ -348,9 +346,9 @@ namespace Main {
      */
     export class Slot {
         public  readonly id: Slot.Id;
-        private readonly baseElem:  SVGSVGElement;
-        private __image: SVGImageElement | undefined;
-        private __messageString:  string | undefined;
+        private readonly baseElem: SVGSVGElement;
+        private __imageFilename: undefined | string;
+        private __messageString: undefined | string;
         private readonly displayModal: (self: Slot) => void;
 
         public constructor(
@@ -387,21 +385,20 @@ namespace Main {
          * Do not use this directly. Use the wrapper defined in `MainScroll`.
          */
         public __fill(desc: Slot.FilenameDesc): void {
-            if (desc.msg) {
-                makeRequest(GITHUB_FILES.urlAssetsGetRaw
-                    + this.id + "/" + desc.msg).then((xhr) => {
-                    this.__messageString = xhr.responseText;
-                });
-            }
+            this.__imageFilename = desc.img;
+            makeRequest(GITHUB_FILES.urlAssetsGetRaw + this.id + "/message.txt")
+            .then((xhr) => {
+                this.__messageString = xhr.responseText;
+            });
             if (desc.img) {
-                const img = this.__image = document.createElementNS(SVG_NSPS, "image");
+                const img = document.createElementNS(SVG_NSPS, "image");
                 img.classList.add("submission__image");
+                img.setAttribute("loading", "lazy");
                 img.tabIndex = 0; // Allow selection via tabbing and click.
                 img.onclick = (ev) => {
                     this.displayModal(this);
                 };
-                const imageSrc = GITHUB_FILES.urlAssetsGetRaw
-                    + this.id + "/" + desc.img;
+                const imageSrc = GITHUB_FILES.urlAssetsGetRaw + this.id + "/thumb.jpeg";
                 img.setAttributeNS(XLINK_NSPS, "href", imageSrc);
                 const box = this.baseElem.viewBox.baseVal;
                 const isa = img.setAttribute.bind(img);
@@ -417,17 +414,16 @@ namespace Main {
             return this.imageSource === "" && this.messageString === "";
         }
         public get imageSource(): string {
-            return this.__image?.href.baseVal || "";
+            return this.__imageFilename ?? "";
         }
         public get messageString(): string {
-            return this.__messageString || "";
+            return this.__messageString ?? "";
         }
     }
     export namespace Slot {
         export type Id = number;
         export type FilenameDesc = Readonly<{
             img: string;
-            msg: string;
         }>;
     }
     Object.freeze(Slot);
