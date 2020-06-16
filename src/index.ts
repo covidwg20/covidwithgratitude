@@ -411,10 +411,12 @@ namespace Main {
             }
         }
         public get isEmpty(): boolean {
-            return this.imageSource === "" && this.messageString === "";
+            return this.messageString === "";
         }
         public get imageSource(): string {
-            return this.__imageFilename ?? "";
+            return this.__imageFilename
+            ? `${GITHUB_FILES.urlAssetsGetRaw}/${this.id}/${this.__imageFilename}`
+            : "";
         }
         public get messageString(): string {
             return this.__messageString ?? "";
