@@ -112,7 +112,7 @@
 }
 
 /* Responsive Submission-View Layout Rules */
-@media screen and (max-aspect-ratio: 2/3) {
+@media screen and (max-aspect-ratio: 1/1) {
     #submission-view {
         padding:    1.0rem;
         gap:        0.6rem;
