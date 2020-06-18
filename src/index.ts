@@ -119,6 +119,8 @@ class Main {
         messageElem:    HTMLDivElement;
         navPrev:        HTMLButtonElement;
         navNext:        HTMLButtonElement;
+        prefetchPrev:   HTMLLinkElement;
+        prefetchNext:   HTMLLinkElement;
     }>;
     private modalCurrentSlot: Main.Slot;
 
@@ -152,6 +154,8 @@ class Main {
         });
 
         // Initialize modal:
+        // NOTE: initialization is separated from assignment to hint
+        // to VSCode to perform stronger type-checking.
         const modal: Main["modal"] = {
             turnOffScrollElem: document.getElementById("top-under-nav-wrapper")!,
             baseElem:    document.getElementById("submission-modal")!,
@@ -159,8 +163,14 @@ class Main {
             messageElem: document.getElementById("submission-view-message") as HTMLDivElement,
             navPrev:     document.getElementById("submission-view-prev")    as HTMLButtonElement,
             navNext:     document.getElementById("submission-view-next")    as HTMLButtonElement,
+            prefetchPrev: document.createElement("link"),
+            prefetchNext: document.createElement("link"),
         };
         this.modal = Object.assign(Object.create(null), modal);
+        this.modal.prefetchPrev.rel = "prefetch";
+        this.modal.prefetchNext.rel = "prefetch";
+        document.head.appendChild(this.modal.prefetchPrev);
+        document.head.appendChild(this.modal.prefetchNext);
         this.__addModalListeners();
         this.hideModal(); // <-- Disable tabbing to its nav buttons.
     }
@@ -224,7 +234,7 @@ class Main {
             this.setModalSubmission(slotSelf);
             this.showModal();
         };
-		const newSlots = __allSlots.splice(__allSlots.length / 2)
+		{const newSlots = __allSlots.splice(__allSlots.length / 2)
             // TODO.build ^Remove splice temp-fix if we solve the
             // duplicating issue from Adobe Illustrator's export.
             // (The second half are unwanted duplicates of the first half).
@@ -249,7 +259,7 @@ class Main {
                     desc.rect,
                 );
             });
-        this.slots.push(...newSlots);
+        this.slots.push(...newSlots);}
         this.artHostElem.appendChild(newSvgCopy);
     }
 
@@ -269,20 +279,54 @@ class Main {
         }
     }
 
-    public setModalSubmission(slot: Main.Slot): void {
+    /**
+     * Returns undefined if there are no further preceding slots.
+     */
+    public get modalPrevSlot(): Main.Slot | undefined {
+        if (this.modalCurrentSlot === undefined) return;
+        for (let i = this.modalCurrentSlot.id - 1; i >= 0; i--) {
+            const slot = this.slots[i];
+            if (!slot.isEmpty) {
+                return slot;
+            }
+        }
+        return undefined
+    }
+    /**
+     * Returns undefined if there are no further slots ahead.
+     */
+    public get modalNextSlot(): Main.Slot | undefined {
+        if (this.modalCurrentSlot === undefined) return;
+        const numSlots = this.slots.length;
+        for (let i = this.modalCurrentSlot.id + 1; i < numSlots; i++) {
+            const slot = this.slots[i];
+            if (!slot.isEmpty) {
+                return slot;
+            }
+        }
+        return undefined;
+    }
+    /**
+     * Does nothing is the slot argument is undefined.
+     */
+    public setModalSubmission(slot: Main.Slot | undefined): void {
+        if (slot === undefined) {
+            return;
+        }
         this.modalCurrentSlot = slot;
+        // Update image:
         if (slot.imageSource) {
             this.modal.imageElem.src = slot.imageSource;
             this.modal.imageElem.style.display = "";
         } else {
             this.modal.imageElem.style.display = "none";
         }
-        if (slot.messageString) {
-            this.modal.messageElem.innerText = slot.messageString;
-            this.modal.messageElem.style.display = "";
-        } else {
-            this.modal.messageElem.style.display = "none";
-        }
+        // Update message text:
+        this.modal.messageElem.textContent = slot.messageString;
+
+        // Prefetch adjacent submission images:
+        this.modal.prefetchPrev.href = this.modalPrevSlot?.imageSource ?? "";
+        this.modal.prefetchNext.href = this.modalNextSlot?.imageSource ?? "";
     }
     public showModal(): void {
         this.modal.baseElem.tabIndex = 0; // Allow clicking background to exit modal.
@@ -303,25 +347,8 @@ class Main {
     }
 
     private __addModalListeners(): void {
-        const modalNavPrev = () => {
-            for (let i = this.modalCurrentSlot.id - 1; i >= 0; i--) {
-                const slot = this.slots[i];
-                if (!slot.isEmpty) {
-                    this.setModalSubmission(slot);
-                    break;
-                }
-            }
-        }
-        const modalNavNext = () => {
-            const numSlots = this.slots.length;
-            for (let i = this.modalCurrentSlot.id + 1; i < numSlots; i++) {
-                const slot = this.slots[i];
-                if (!slot.isEmpty) {
-                    this.setModalSubmission(slot);
-                    break;
-                }
-            }
-        }
+        const modalNavPrev = () => { this.setModalSubmission(this.modalPrevSlot); };
+        const modalNavNext = () => { this.setModalSubmission(this.modalNextSlot); };
         this.modal.baseElem.addEventListener("keydown", (ev) => {
             if (ev.key === "Escape") {
                 this.hideModal();
@@ -373,7 +400,7 @@ namespace Main {
             // Create id text:
             const idText = document.createElementNS(SVG_NSPS, "text");
             idText.classList.add("submission__id-text");
-            idText.innerHTML = id.toString();
+            idText.textContent = id.toString();
             base.appendChild(idText);
 
             // Attach base element to svg/xml document.
@@ -415,7 +442,7 @@ namespace Main {
         }
         public get imageSource(): string {
             return this.__imageFilename
-            ? `${GITHUB_FILES.urlAssetsGetRaw}/${this.id}/${this.__imageFilename}`
+            ? GITHUB_FILES.urlAssetsGetRaw + `${this.id}/${this.__imageFilename}`
             : "";
         }
         public get messageString(): string {

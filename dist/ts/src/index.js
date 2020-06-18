@@ -176,8 +176,14 @@ var Main = (function () {
             messageElem: document.getElementById("submission-view-message"),
             navPrev: document.getElementById("submission-view-prev"),
             navNext: document.getElementById("submission-view-next"),
+            prefetchPrev: document.createElement("link"),
+            prefetchNext: document.createElement("link"),
         };
         this.modal = Object.assign(Object.create(null), modal);
+        this.modal.prefetchPrev.rel = "prefetch";
+        this.modal.prefetchNext.rel = "prefetch";
+        document.head.appendChild(this.modal.prefetchPrev);
+        document.head.appendChild(this.modal.prefetchNext);
         this.__addModalListeners();
         this.hideModal();
     }
@@ -211,13 +217,15 @@ var Main = (function () {
                             _this.setModalSubmission(slotSelf);
                             _this.showModal();
                         };
-                        newSlots = __allSlots.splice(__allSlots.length / 2)
-                            .map(function (rect) { return Object.freeze({ rect: rect, x: rect.x.baseVal.value, y: rect.y.baseVal.value, }); })
-                            .sort(function (a, b) { return a.x - b.x; }).sort(function (a, b) { return a.y - b.y; })
-                            .map(function (desc, index) {
-                            return new Main.Slot(prevNumSlots + index, displayModal, desc.rect);
-                        });
-                        (_a = this.slots).push.apply(_a, newSlots);
+                        {
+                            newSlots = __allSlots.splice(__allSlots.length / 2)
+                                .map(function (rect) { return Object.freeze({ rect: rect, x: rect.x.baseVal.value, y: rect.y.baseVal.value, }); })
+                                .sort(function (a, b) { return a.x - b.x; }).sort(function (a, b) { return a.y - b.y; })
+                                .map(function (desc, index) {
+                                return new Main.Slot(prevNumSlots + index, displayModal, desc.rect);
+                            });
+                            (_a = this.slots).push.apply(_a, newSlots);
+                        }
                         this.artHostElem.appendChild(newSvgCopy);
                         return [2];
                 }
@@ -248,7 +256,42 @@ var Main = (function () {
             });
         });
     };
+    Object.defineProperty(Main.prototype, "modalPrevSlot", {
+        get: function () {
+            if (this.modalCurrentSlot === undefined)
+                return;
+            for (var i = this.modalCurrentSlot.id - 1; i >= 0; i--) {
+                var slot = this.slots[i];
+                if (!slot.isEmpty) {
+                    return slot;
+                }
+            }
+            return undefined;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Main.prototype, "modalNextSlot", {
+        get: function () {
+            if (this.modalCurrentSlot === undefined)
+                return;
+            var numSlots = this.slots.length;
+            for (var i = this.modalCurrentSlot.id + 1; i < numSlots; i++) {
+                var slot = this.slots[i];
+                if (!slot.isEmpty) {
+                    return slot;
+                }
+            }
+            return undefined;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Main.prototype.setModalSubmission = function (slot) {
+        var _a, _b, _c, _d;
+        if (slot === undefined) {
+            return;
+        }
         this.modalCurrentSlot = slot;
         if (slot.imageSource) {
             this.modal.imageElem.src = slot.imageSource;
@@ -257,13 +300,9 @@ var Main = (function () {
         else {
             this.modal.imageElem.style.display = "none";
         }
-        if (slot.messageString) {
-            this.modal.messageElem.innerText = slot.messageString;
-            this.modal.messageElem.style.display = "";
-        }
-        else {
-            this.modal.messageElem.style.display = "none";
-        }
+        this.modal.messageElem.textContent = slot.messageString;
+        this.modal.prefetchPrev.href = (_b = (_a = this.modalPrevSlot) === null || _a === void 0 ? void 0 : _a.imageSource) !== null && _b !== void 0 ? _b : "";
+        this.modal.prefetchNext.href = (_d = (_c = this.modalNextSlot) === null || _c === void 0 ? void 0 : _c.imageSource) !== null && _d !== void 0 ? _d : "";
     };
     Main.prototype.showModal = function () {
         this.modal.baseElem.tabIndex = 0;
@@ -284,25 +323,8 @@ var Main = (function () {
     };
     Main.prototype.__addModalListeners = function () {
         var _this = this;
-        var modalNavPrev = function () {
-            for (var i = _this.modalCurrentSlot.id - 1; i >= 0; i--) {
-                var slot = _this.slots[i];
-                if (!slot.isEmpty) {
-                    _this.setModalSubmission(slot);
-                    break;
-                }
-            }
-        };
-        var modalNavNext = function () {
-            var numSlots = _this.slots.length;
-            for (var i = _this.modalCurrentSlot.id + 1; i < numSlots; i++) {
-                var slot = _this.slots[i];
-                if (!slot.isEmpty) {
-                    _this.setModalSubmission(slot);
-                    break;
-                }
-            }
-        };
+        var modalNavPrev = function () { _this.setModalSubmission(_this.modalPrevSlot); };
+        var modalNavNext = function () { _this.setModalSubmission(_this.modalNextSlot); };
         this.modal.baseElem.addEventListener("keydown", function (ev) {
             if (ev.key === "Escape") {
                 _this.hideModal();
@@ -341,7 +363,7 @@ var Main = (function () {
             bsa("viewBox", -w.value / 2 + " " + -h.value / 2 + " " + w.value + " " + h.value);
             var idText = document.createElementNS(SVG_NSPS, "text");
             idText.classList.add("submission__id-text");
-            idText.innerHTML = id.toString();
+            idText.textContent = id.toString();
             base.appendChild(idText);
             rect.insertAdjacentElement("afterend", base);
         }
@@ -382,7 +404,7 @@ var Main = (function () {
         Object.defineProperty(Slot.prototype, "imageSource", {
             get: function () {
                 return this.__imageFilename
-                    ? GITHUB_FILES.urlAssetsGetRaw + "/" + this.id + "/" + this.__imageFilename
+                    ? GITHUB_FILES.urlAssetsGetRaw + (this.id + "/" + this.__imageFilename)
                     : "";
             },
             enumerable: true,
