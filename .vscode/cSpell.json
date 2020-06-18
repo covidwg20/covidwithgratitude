@@ -24,6 +24,7 @@
         "desc", "descs",
         "elem",
         "nsps",
+        "prefetch",
         "retval",
         "recurse",
         "sizer",
