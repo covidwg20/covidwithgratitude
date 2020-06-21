@@ -88,6 +88,7 @@
 #submission-view-message {
     padding:        0.7rem;
     background-color: var(--colour-white);
+    white-space:    pre-line;
 }
 #submission-view-prev { background-image: url("../images/chevron-left.svg"); }
 #submission-view-next { background-image: url("../images/chevron-right.svg"); }
@@ -100,7 +101,7 @@
 
     background-color: var(--colour-white);
     background-size: cover;
-    clip-path: circle();
+    border-radius:  50%;
 
     transition-property: transform;
     transition-duration: 0.25s;
