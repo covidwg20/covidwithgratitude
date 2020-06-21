@@ -17,6 +17,6 @@ smbDirs.forEach((sbmDirName) => {
 });
 fs.writeFile(
     path.resolve(sbmRoot, "existing.json"),
-    JSON.stringify(jsonObj),
+    JSON.stringify(jsonObj, null, "\t"),
     (err) => console.log(err),
 );
